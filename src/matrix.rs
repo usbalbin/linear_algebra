@@ -28,6 +28,14 @@ impl<T: Copy> Matrix<T> {
             col_count
         }
     }
+
+    pub fn generate<F: FnMut(usize)-> T>(f: F, row_count: usize, col_count: usize) -> Matrix<T> {
+        Matrix {
+            data: Vector::generate(f, row_count * col_count),
+            row_count,
+            col_count
+        }
+    }
 }
 
 

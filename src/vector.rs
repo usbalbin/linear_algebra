@@ -20,6 +20,14 @@ impl<T: Clone> Vector<T> {
         }
     }
 
+    pub fn generate<F: FnMut(usize)-> T>(f: F, size: usize) -> Vector<T> {
+        let data = (0..size).map(f).collect();
+
+        Vector {
+            data
+        }
+    }
+
     pub fn len(&self) -> usize {
         self.data.len()
     }
