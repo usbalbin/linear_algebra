@@ -36,6 +36,18 @@ impl<T: Copy> Matrix<T> {
             col_count
         }
     }
+
+    pub fn len(&self) -> (usize, usize) {
+        (self.row_count, self.col_count)
+    }
+
+    pub fn get_row_count(&self) -> usize {
+        self.row_count
+    }
+
+    pub fn get_col_count(&self) -> usize {
+        self.col_count
+    }
 }
 
 
