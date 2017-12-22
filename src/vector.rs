@@ -43,6 +43,14 @@ impl<T: Clone> Vector<T> {
         }
         res
     }
+
+    pub fn iter(&self) -> ::std::slice::Iter<T> {
+        self.data.iter()
+    }
+
+    pub fn iter_mut(&mut self) -> ::std::slice::IterMut<T> {
+        self.data.iter_mut()
+    }
 }
 
 impl<'a, 'b, T: Copy + ::std::ops::Add<T, Output=T>> ::std::ops::Add<&'b Vector<T>> for &'a Vector<T> {
