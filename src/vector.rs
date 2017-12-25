@@ -20,15 +20,21 @@ pub struct Vector<T> {
     data: Vec<T>
 }
 
-impl<T: Clone> Vector<T> {
-    pub fn new(default_val: T, size: usize) -> Vector<T> {
+impl<T> Vector<T> {
+    pub fn new(default_val: T, size: usize) -> Vector<T>
+        where T: Clone
+    {
         Vector {
             data: vec![default_val; size]
         }
     }
 
     pub unsafe fn uninitialized(size: usize) -> Vector<T> {
-        Vector::new(::std::mem::uninitialized(), size)
+        let mut data = Vec::with_capacity(size);
+        data.set_len(size);
+        Vector {
+            data
+        }
     }
 
     pub fn from_vec(v: Vec<T>) -> Vector<T> {
@@ -49,7 +55,7 @@ impl<T: Clone> Vector<T> {
         self.data.len()
     }
 
-    fn from_for_each2<F: Fn(&T, &T) -> T>(a: &Vector<T>, b: &Vector<T>, p: F) -> Vector<T> {
+    pub fn from_for_each2<F: Fn(&T, &T) -> T>(a: &Vector<T>, b: &Vector<T>, p: F) -> Vector<T> {
         assert_eq!(a.len(), b.len());
 
         let mut res = unsafe{ Vector::uninitialized(a.len()) };
@@ -59,6 +65,14 @@ impl<T: Clone> Vector<T> {
             *r = p(s,o);
         }
         res
+    }
+
+    pub fn for_each_mut<F: Fn(&mut T, &T)>(&mut self, other: &Vector<T>, p: F){
+        assert_eq!(self.len(), other.len());
+
+        for (s, o) in self.data.iter_mut().zip(other.data.iter()) {
+            p(s, o);
+        }
     }
 
     pub fn iter(&self) -> ::std::slice::Iter<T> {
@@ -101,12 +115,28 @@ impl<'a, 'b, T: Copy + ::std::ops::Add<T, Output=T>> ::std::ops::Add<&'b Vector<
     }
 }
 
+impl<'a, T: Copy + ::std::ops::AddAssign<T>> ::std::ops::AddAssign<&'a Vector<T>> for Vector<T> {
+    fn add_assign(&mut self, other: &'a Vector<T>) {
+        Vector::for_each_mut(self, other, |a, b|{
+            *a += *b
+        });
+    }
+}
+
 impl<'a, 'b, T: Copy + ::std::ops::Sub<T, Output=T>> ::std::ops::Sub<&'b Vector<T>> for &'a Vector<T> {
     type Output = Vector<T>;
     fn sub(self, other: &'b Vector<T>) -> Vector<T> {
         Vector::from_for_each2(self, other, |a: &T, b: &T|{
             *a - *b
         })
+    }
+}
+
+impl<'a, T: Copy + ::std::ops::SubAssign<T>> ::std::ops::SubAssign<&'a Vector<T>> for Vector<T> {
+    fn sub_assign(&mut self, other: &'a Vector<T>) {
+        Vector::for_each_mut(self, other, |a, b|{
+            *a -= *b
+        });
     }
 }
 
@@ -141,6 +171,15 @@ impl<'a, 'b, T> ::std::ops::Mul<&'b Matrix<T>> for &'a Vector<T>
         Vector{
             data: result.collect()
         }
+    }
+}
+
+/// Compute vector * other_m^-1, where other_m^-1 is the transpose of matrix other_m
+pub fn mul_transpose_mat<T: Copy + Mul<T, Output=T> + Add + ::std::iter::Sum>(vector: &Vector<T>, other_m: &Matrix<T>) -> Vector<T> {
+    assert_eq!(vector.len(), other_m.get_row_count());
+    let result = (0..vector.len()).map(|i| dot(vector, other_m.get_row(i)));
+    Vector{
+        data: result.collect()
     }
 }
 

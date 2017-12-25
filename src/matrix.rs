@@ -32,8 +32,10 @@ pub struct Matrix<T> {
     col_count: usize
 }
 
-impl<T: Copy> Matrix<T> {
-    pub fn new(default_value: T, row_count: usize, col_count: usize) -> Matrix<T> {
+impl<T> Matrix<T> {
+    pub fn new(default_value: T, row_count: usize, col_count: usize) -> Matrix<T>
+        where T: Copy
+    {
         Matrix {
             data: Vector::new(default_value, row_count * col_count),
             row_count,
@@ -42,7 +44,11 @@ impl<T: Copy> Matrix<T> {
     }
 
     pub unsafe fn uninitialized(row_count: usize, col_count: usize) -> Matrix<T> {
-        Matrix::new(::std::mem::uninitialized(), row_count, col_count)
+        Matrix {
+            data: Vector::uninitialized(row_count * col_count),
+            row_count,
+            col_count
+        }
     }
 
     pub fn from_vec(v: Vec<T>, row_count: usize, col_count: usize) -> Matrix<T> {
@@ -102,6 +108,14 @@ impl<'a, 'b, T: Copy + ::std::ops::Add<T, Output=T>> ::std::ops::Add<&'b Matrix<
     }
 }
 
+impl<'a, T: Copy + ::std::ops::AddAssign<T>> ::std::ops::AddAssign<&'a Matrix<T>> for Matrix<T> {
+    fn add_assign(&mut self, other: &'a Matrix<T>) {
+        assert_eq!(self.row_count, other.row_count);
+        assert_eq!(self.col_count, other.col_count);
+        self.data += &other.data;
+    }
+}
+
 impl<'a, 'b, T: Copy + ::std::ops::Sub<T, Output=T>> ::std::ops::Sub<&'b Matrix<T>> for &'a Matrix<T> {
     type Output = Matrix<T>;
     fn sub(self, other: &'b Matrix<T>) -> Matrix<T> {
@@ -113,6 +127,14 @@ impl<'a, 'b, T: Copy + ::std::ops::Sub<T, Output=T>> ::std::ops::Sub<&'b Matrix<
             row_count: self.row_count,
             col_count: self.col_count
         }
+    }
+}
+
+impl<'a, T: Copy + ::std::ops::SubAssign<T>> ::std::ops::SubAssign<&'a Matrix<T>> for Matrix<T> {
+    fn sub_assign(&mut self, other: &'a Matrix<T>) {
+        assert_eq!(self.row_count, other.row_count);
+        assert_eq!(self.col_count, other.col_count);
+        self.data -= &other.data;
     }
 }
 
@@ -148,6 +170,31 @@ impl<'a, 'b, T: Copy + ::std::ops::Mul<T, Output=T> + ::std::ops::Add<T, Output=
             }
         }
         res
+    }
+}
+
+/// Multiplies two vectors as if they where one one-column-matrix and one one-row-matrix respectively
+/// resulting in a matrix with row.len() columns and col.len() rows
+pub fn mul_column_row<T: ::std::ops::Mul<T, Output=T> + Copy>(column: &Vector<T>, row: &Vector<T>) -> Matrix<T> {
+    let col_count = row.len();
+    let row_count = column.len();
+    let mut data = Vec::with_capacity(col_count * row_count);
+    unsafe {
+        data.set_len(col_count * row_count);
+    }
+
+    for row_index in 0..row_count {
+        for col_index in 0..col_count {
+            data[row_index * col_count + col_index] = column[row_index] * row[col_index];
+        }
+    }
+
+    Matrix{
+        data: Vector::from_vec(
+            data
+        ),
+        row_count,
+        col_count
     }
 }
 
