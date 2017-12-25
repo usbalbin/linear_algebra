@@ -76,6 +76,20 @@ impl<T: Clone> Vector<T> {
     pub fn chunks_mut(&mut self, size: usize) -> ::std::slice::ChunksMut<T> {
         self.data.chunks_mut(size)
     }
+
+    /// Applies p for every element in vector
+    pub fn map_mut<F: FnMut(&mut T)>(&mut self, mut p: F) {
+        for elem in self.iter_mut() {
+            p(elem)
+        }
+    }
+
+    /// Returns copy of self with p applied to each element
+    pub fn map<F: FnMut(&T)->&T>(&mut self, p: F) -> Vector<T> {
+        Vector {
+            data: self.data.iter().map(p).cloned().collect()
+        }
+    }
 }
 
 impl<'a, 'b, T: Copy + ::std::ops::Add<T, Output=T>> ::std::ops::Add<&'b Vector<T>> for &'a Vector<T> {
@@ -107,7 +121,6 @@ impl<'a, 'b, T: Copy + ::std::ops::Mul<T, Output=T>> ::std::ops::Mul<T> for &'a 
         res
     }
 }
-
 
 impl<'a, 'b, T: Copy + ::std::ops::Mul<T, Output=T>> ::std::ops::Mul<&'b Vector<T>> for &'a Vector<T> {
     type Output = Vector<T>;
