@@ -33,7 +33,7 @@ fn vec_add_and_scalar_mul() {
     let s = &a + &a;
     let p = &a * 2;
 
-    for (r, (s, p)) in r.iter().zip(r.iter().zip(p.iter())) {
+    for (r, (s, p)) in r.iter().zip(s.iter().zip(p.iter())) {
         assert_eq!(r, s);
         assert_eq!(s, p);
     }

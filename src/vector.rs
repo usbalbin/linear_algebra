@@ -85,7 +85,7 @@ impl<T: Clone> Vector<T> {
     }
 
     /// Returns copy of self with p applied to each element
-    pub fn map<F: FnMut(&T)->&T>(&mut self, p: F) -> Vector<T> {
+    pub fn map<F: FnMut(&T)->&T>(&self, p: F) -> Vector<T> {
         Vector {
             data: self.data.iter().map(p).cloned().collect()
         }
