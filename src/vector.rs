@@ -1,4 +1,21 @@
 
+use matrix::Matrix;
+
+use ::std::ops::{Add, Mul};
+
+pub fn dot<'a, T, IT>(vector: &Vector<T>, it: IT) -> T
+    where
+        T: 'a +
+        Copy +
+        Add +
+        Mul +
+        ::std::iter::Sum<<T as ::std::ops::Mul>::Output>,
+        IT: Iterator<Item = &'a T>
+{
+    //assert_eq!(vector.len(), it.count());
+    vector.iter().zip(it).map(|(v, r)| *v * *r).sum()
+}
+
 pub struct Vector<T> {
     data: Vec<T>
 }
@@ -51,6 +68,14 @@ impl<T: Clone> Vector<T> {
     pub fn iter_mut(&mut self) -> ::std::slice::IterMut<T> {
         self.data.iter_mut()
     }
+
+    pub fn chunks(&self, size: usize) -> ::std::slice::Chunks<T> {
+        self.data.chunks(size)
+    }
+
+    pub fn chunks_mut(&mut self, size: usize) -> ::std::slice::ChunksMut<T> {
+        self.data.chunks_mut(size)
+    }
 }
 
 impl<'a, 'b, T: Copy + ::std::ops::Add<T, Output=T>> ::std::ops::Add<&'b Vector<T>> for &'a Vector<T> {
@@ -90,6 +115,19 @@ impl<'a, 'b, T: Copy + ::std::ops::Mul<T, Output=T>> ::std::ops::Mul<&'b Vector<
         Vector::from_for_each2(self, other, |a: &T, b: &T|{
             *a * *b
         })
+    }
+}
+
+impl<'a, 'b, T> ::std::ops::Mul<&'b Matrix<T>> for &'a Vector<T>
+    where T: Copy + Mul<T, Output=T> + Add + ::std::iter::Sum
+{
+    type Output = Vector<T>;
+    fn mul(self, other_m: &'b Matrix<T>) -> Vector<T> {
+        assert_eq!(self.len(), other_m.get_col_count());
+        let result = (0..self.len()).map(|i| dot(self, other_m.get_col(i)));
+        Vector{
+            data: result.collect()
+        }
     }
 }
 

@@ -1,4 +1,4 @@
-[root]
+[[package]]
 name = "linear_algebra"
-version = "0.1.2"
+version = "0.1.3"
 

@@ -1,5 +1,30 @@
 
+
 use vector::*;
+
+//Iterate through every value in given row
+pub struct Row<'a, T: 'a> {
+    it: ::std::iter::Take<::std::iter::Skip<::std::slice::Iter<'a, T>>>
+}
+
+impl<'a, T: Copy> Iterator for Row<'a, T> {
+    type Item = &'a T;
+    fn next(&mut self) -> Option<&'a T> {
+        self.it.next()
+    }
+}
+
+//Iterate through every value in given column
+pub struct Column<'a, T: 'a> {
+    it: ::std::iter::Take<::std::iter::StepBy<::std::iter::Skip<::std::slice::Iter<'a, T>>>>
+}
+
+impl<'a, T> Iterator for Column<'a, T> {
+    type Item = &'a T;
+    fn next(&mut self) -> Option<&'a T> {
+        self.it.next()
+    }
+}
 
 pub struct Matrix<T> {
     data: Vector<T>,
@@ -47,6 +72,18 @@ impl<T: Copy> Matrix<T> {
 
     pub fn get_col_count(&self) -> usize {
         self.col_count
+    }
+
+    pub fn get_row(&self, row: usize) -> Row<T> {
+        Row {
+            it: self.data.iter().skip(row * self.col_count).take(self.col_count)
+        }
+    }
+
+    pub fn get_col(&self, column: usize) -> Column<T> {
+        Column {
+            it: self.data.iter().skip(column).step_by(self.col_count).take(self.row_count)
+        }
     }
 }
 
