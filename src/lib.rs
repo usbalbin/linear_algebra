@@ -3,7 +3,7 @@
 pub mod vector;
 pub mod matrix;
 
-//#[test]
+#[test]
 pub fn vec_mat_mul() {
     use vector::*;
     use matrix::*;
@@ -24,7 +24,7 @@ pub fn vec_mat_mul() {
     }
 }
 
-//#[test]
+#[test]
 pub fn vec_add_and_scalar_mul() {
     use vector::*;
 
