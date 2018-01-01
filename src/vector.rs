@@ -227,6 +227,6 @@ impl<T: ::std::fmt::Display + Clone> ::std::fmt::Display for Vector<T> {
         for i in 1..self.len() {
             write!(f, ", {}", self.data[i])?;
         }
-        writeln!(f, " }}")
+        write!(f, " }}")
     }
 }
