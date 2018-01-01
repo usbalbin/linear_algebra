@@ -179,7 +179,9 @@ impl<'a, 'b, T> ::std::ops::Mul<&'b Matrix<T>> for &'a Vector<T>
 /// Compute vector * other_m^-1, where other_m^-1 is the transpose of matrix other_m
 pub fn mul_transpose_mat<T: Copy + Mul<T, Output=T> + Add + ::std::iter::Sum>(vector: &Vector<T>, other_m: &Matrix<T>) -> Vector<T> {
     assert_eq!(vector.len(), other_m.get_col_count());
-    let result = (0..other_m.get_row_count()).map(|i| dot(vector, other_m.get_row(i)));
+    let result =
+        (0..other_m.get_row_count())//For each row
+            .map(|i| dot(vector, other_m.get_row(i)));
     Vector{
         data: result.collect()
     }
