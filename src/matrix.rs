@@ -81,12 +81,14 @@ impl<T> Matrix<T> {
     }
 
     pub fn get_row(&self, row: usize) -> Row<T> {
+        assert!(row < self.get_row_count());
         Row {
             it: self.data.iter().skip(row * self.col_count).take(self.col_count)
         }
     }
 
     pub fn get_col(&self, column: usize) -> Column<T> {
+        assert!(column < self.get_col_count());
         Column {
             it: self.data.iter().skip(column).step_by(self.col_count).take(self.row_count)
         }

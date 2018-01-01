@@ -3,28 +3,29 @@
 pub mod vector;
 pub mod matrix;
 
-#[test]
-fn vec_mat_mul() {
+//#[test]
+pub fn vec_mat_mul() {
     use vector::*;
     use matrix::*;
 
     let a = Vector::from_vec(vec![1, 2, 3, 4]);
-    let b = Vector::from_vec(vec![1, 4, 9, 16]);
+    let b = Vector::from_vec(vec![5, 4, 9, 4]);
     let m = Matrix::from_vec(vec![
-        1, 0, 0, 0,
-        0, 2, 0, 0,
-        0, 0, 3, 0,
-        0, 0, 0, 4
-    ], 4, 4);
+        1, 0, 0,
+        0, 2, 0,
+        0, 0, 3,
+        1, 0, 0
+    ], 4, 3);
 
     let p = &a * &m;
+    println!("{}", p);
     for (p, b) in p.iter().zip(b.iter()) {
         assert_eq!(p, b);
     }
 }
 
-#[test]
-fn vec_add_and_scalar_mul() {
+//#[test]
+pub fn vec_add_and_scalar_mul() {
     use vector::*;
 
     let a = Vector::from_vec(vec![1, 2, 3, 4]);
