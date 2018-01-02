@@ -118,6 +118,14 @@ impl<'a, T: Copy + ::std::ops::AddAssign<T>> ::std::ops::AddAssign<&'a Matrix<T>
     }
 }
 
+impl<'a, T: Copy + ::std::ops::AddAssign<T>> ::std::ops::Add<&'a Matrix<T>> for Matrix<T> {
+    type Output = Matrix<T>;
+    fn add(mut self, other: &'a Matrix<T>) -> Matrix<T> {
+        self += other;
+        self
+    }
+}
+
 impl<'a, 'b, T: Copy + ::std::ops::Sub<T, Output=T>> ::std::ops::Sub<&'b Matrix<T>> for &'a Matrix<T> {
     type Output = Matrix<T>;
     fn sub(self, other: &'b Matrix<T>) -> Matrix<T> {
@@ -140,6 +148,14 @@ impl<'a, T: Copy + ::std::ops::SubAssign<T>> ::std::ops::SubAssign<&'a Matrix<T>
     }
 }
 
+impl<'a, T: Copy + ::std::ops::SubAssign<T>> ::std::ops::Sub<&'a Matrix<T>> for Matrix<T> {
+    type Output = Matrix<T>;
+    fn sub(mut self, other: &'a Matrix<T>) -> Matrix<T> {
+        self -= other;
+        self
+    }
+}
+
 //Mul with scalar
 impl<'a, 'b, T: Copy + ::std::ops::Mul<T, Output=T>> ::std::ops::Mul<T> for &'a Matrix<T> {
     type Output = Matrix<T>;
@@ -149,6 +165,20 @@ impl<'a, 'b, T: Copy + ::std::ops::Mul<T, Output=T>> ::std::ops::Mul<T> for &'a 
             row_count: self.row_count,
             col_count: self.col_count
         }
+    }
+}
+
+impl<'a, 'b, T: Copy + ::std::ops::Mul<T, Output=T>> ::std::ops::MulAssign<T> for Matrix<T> {
+    fn mul_assign(&mut self, scalar: T) {
+        self.data *= scalar;
+    }
+}
+
+impl<'a, 'b, T: Copy + ::std::ops::Mul<T, Output=T>> ::std::ops::Mul<T> for Matrix<T> {
+    type Output = Matrix<T>;
+    fn mul(mut self, scalar: T) -> Matrix<T> {
+        self *= scalar;
+        self
     }
 }
 

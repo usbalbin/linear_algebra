@@ -123,6 +123,14 @@ impl<'a, T: Copy + ::std::ops::AddAssign<T>> ::std::ops::AddAssign<&'a Vector<T>
     }
 }
 
+impl<'a, T: Copy + ::std::ops::AddAssign<T>> ::std::ops::Add<&'a Vector<T>> for Vector<T> {
+    type Output = Vector<T>;
+    fn add(mut self, other: &'a Vector<T>) -> Vector<T> {
+        self += other;
+        self
+    }
+}
+
 impl<'a, 'b, T: Copy + ::std::ops::Sub<T, Output=T>> ::std::ops::Sub<&'b Vector<T>> for &'a Vector<T> {
     type Output = Vector<T>;
     fn sub(self, other: &'b Vector<T>) -> Vector<T> {
@@ -149,6 +157,22 @@ impl<'a, 'b, T: Copy + ::std::ops::Mul<T, Output=T>> ::std::ops::Mul<T> for &'a 
             *r = *s * scalar;
         }
         res
+    }
+}
+
+impl<T: Copy + ::std::ops::Mul<T, Output=T>> ::std::ops::MulAssign<T> for Vector<T> {
+    fn mul_assign(&mut self, scalar: T) {
+        for r in self.data.iter_mut() {
+            *r = *r * scalar;
+        }
+    }
+}
+
+impl<T: Copy + ::std::ops::Mul<T, Output=T>> ::std::ops::Mul<T> for Vector<T> {
+    type Output = Vector<T>;
+    fn mul(mut self, scalar: T) -> Vector<T> {
+        self *= scalar;
+        self
     }
 }
 
