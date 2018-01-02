@@ -183,7 +183,13 @@ impl<'a, 'b, T: Copy + ::std::ops::Mul<T, Output=T>> ::std::ops::Mul<T> for Matr
 }
 
 
-impl<'a, 'b, T: Copy + ::std::ops::Mul<T, Output=T> + ::std::ops::Add<T, Output=T>> ::std::ops::Mul<&'b Matrix<T>> for &'a Matrix<T> {
+impl<'a, 'b, T> ::std::ops::Mul<&'b Matrix<T>> for &'a Matrix<T>
+    where T:
+        Copy +
+        ::std::ops::Mul<T, Output=T> +
+        ::std::ops::Add<T, Output=T> +
+        ::std::iter::Sum
+{
     type Output = Matrix<T>;
     fn mul(self, other: &'b Matrix<T>) -> Matrix<T> {
         assert_eq!(self.col_count, other.row_count);
@@ -192,13 +198,7 @@ impl<'a, 'b, T: Copy + ::std::ops::Mul<T, Output=T> + ::std::ops::Add<T, Output=
 
         for row in 0..res.row_count {
             for col in 0..res.col_count {
-                res.data[row * res.col_count + col + 0] =
-                    self.data[row * self.col_count + col + 0] * other.data[0 * other.col_count + col];
-                for i in 1..self.col_count {
-                    res.data[row * res.col_count + col] =
-                        res.data[row * res.col_count + col] +
-                            (self.data[row * self.col_count + i] * other.data[i * other.col_count + col]);
-                }
+                res.data[row * res.col_count + col] = dot_it_it(self.get_row(row), other.get_col(col));
             }
         }
         res

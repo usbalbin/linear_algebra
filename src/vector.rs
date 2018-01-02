@@ -3,6 +3,16 @@ use matrix::Matrix;
 
 use ::std::ops::{Add, Mul};
 
+pub fn dot_it_it<'a, T, ItA, ItB>(a: ItA, b: ItB) -> T
+    where
+        T: 'a + Copy + ::std::ops::Mul + ::std::iter::Sum<<T as ::std::ops::Mul>::Output>,
+        ItA: Iterator<Item = &'a T>,
+        ItB: Iterator<Item = &'a T>
+{
+    //assert_eq!(a.count(), b.count());
+    a.zip(b).map(|(x, y)| *x * *y).sum()
+}
+
 pub fn dot<'a, T, IT>(vector: &Vector<T>, it: IT) -> T
     where
         T: 'a +
