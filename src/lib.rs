@@ -57,13 +57,33 @@ fn cl_data<T: Parameter>() -> &'static mut Option<OclData> {
     }
 }
 
+/// Create Kernel object from kernel source in extra_kernels.cl
+pub fn create_kernel<T: Parameter>(kernel_name: &str) -> ocl::Kernel {
+    let queue = &mut cl_data::<T>().as_mut().unwrap().queue;
+    match queue.create_kernel(kernel_name) {
+        Ok(kernel) => kernel,
+        Err(error) => panic!("Failed to create kernel. Forgot to add kernel source to kernel.cl?: {}", error)
+    }
+}
+
+fn load_extra_src() -> Result<String, std::io::Error> {
+    use std::fs::File;
+    use std::io::prelude::*;
+    let mut file = File::open("src/extra_kernels.cl")?;
+    let mut contents = String::new();
+    file.read_to_string(&mut contents)?;
+    Ok(contents)
+}
+
 unsafe fn init_cl<T: Parameter>(ocl_data: &mut Option<OclData>) {
+    let extra_src = load_extra_src().unwrap_or_default();
     let src = if T::type_to_str() == "double" {
         "#pragma OPENCL EXTENSION cl_khr_fp64 : enable\n"
     } else {
         ""
     }.to_owned() +
-        &include_str!("kernels.cl").replace("{T}", T::type_to_str());
+        &include_str!("kernels.cl").replace("{T}", T::type_to_str())
+        + "\n" + extra_src.as_ref();
 
     let queue = match ProQue::builder()
         .device(ocl::flags::DEVICE_TYPE_GPU)
