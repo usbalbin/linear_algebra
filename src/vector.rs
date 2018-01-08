@@ -111,11 +111,11 @@ impl<T: Parameter> Vector<T> {
         res
     }
 
-    pub fn get_buffer(&self) -> &ocl::Buffer<T> {
+    pub unsafe fn get_buffer(&self) -> &ocl::Buffer<T> {
         &self.data
     }
 
-    pub fn get_buffer_mut(&mut self) -> &mut ocl::Buffer<T> {
+    pub unsafe fn get_buffer_mut(&mut self) -> &mut ocl::Buffer<T> {
         &mut self.data
     }
 }

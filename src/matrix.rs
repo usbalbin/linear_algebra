@@ -60,11 +60,11 @@ impl<T: Parameter> Matrix<T> {
         self.col_count
     }
 
-    pub fn get_buffer(&self) -> &ocl::Buffer<T> {
+    pub unsafe fn get_buffer(&self) -> &ocl::Buffer<T> {
         self.data.get_buffer()
     }
 
-    pub fn get_buffer_mut(&mut self) -> &mut ocl::Buffer<T> {
+    pub unsafe fn get_buffer_mut(&mut self) -> &mut ocl::Buffer<T> {
         self.data.get_buffer_mut()
     }
 }

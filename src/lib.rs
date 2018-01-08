@@ -85,9 +85,9 @@ unsafe fn init_cl<T: Parameter>(ocl_data: &mut Option<OclData>) {
         "#pragma OPENCL EXTENSION cl_khr_fp64 : enable\n"
     } else {
         ""
-    }.to_owned() +
-        &include_str!("kernels.cl").replace("{T}", T::type_to_str())
-        + "\n" + extra_src.as_ref();
+    }.to_owned();
+    let src = src + include_str!("kernels.cl")  + "\n" + &extra_src;
+    let src = src.replace("{T}", T::type_to_str());
 
     let queue = match ProQue::builder()
         .device(ocl::flags::DEVICE_TYPE_GPU)
