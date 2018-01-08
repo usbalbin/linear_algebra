@@ -110,6 +110,14 @@ impl<T: Parameter> Vector<T> {
         unsafe { kernel.cmd().gws(res.len()).enq().unwrap(); }
         res
     }
+
+    pub fn get_buffer(&self) -> &ocl::Buffer<T> {
+        &self.data
+    }
+
+    pub fn get_buffer_mut(&mut self) -> &mut ocl::Buffer<T> {
+        &mut self.data
+    }
 }
 
 impl<'a, 'b, T> ::std::ops::Add<&'b Vector<T>> for &'a Vector<T>

@@ -58,6 +58,10 @@ fn cl_data<T: Parameter>() -> &'static mut Option<OclData> {
 }
 
 /// Create Kernel object from kernel source in extra_kernels.cl
+///
+/// Note:
+/// In kernel source, use {T} as type when referring to corresponding rust equivalent T.
+/// Variable name 'i' is defined as get_global_id(0)
 pub fn create_kernel<T: Parameter>(kernel_name: &str) -> ocl::Kernel {
     let queue = &mut cl_data::<T>().as_mut().unwrap().queue;
     match queue.create_kernel(kernel_name) {

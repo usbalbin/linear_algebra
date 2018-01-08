@@ -59,6 +59,14 @@ impl<T: Parameter> Matrix<T> {
     pub fn get_col_count(&self) -> usize {
         self.col_count
     }
+
+    pub fn get_buffer(&self) -> &ocl::Buffer<T> {
+        self.data.get_buffer()
+    }
+
+    pub fn get_buffer_mut(&mut self) -> &mut ocl::Buffer<T> {
+        self.data.get_buffer_mut()
+    }
 }
 
 
