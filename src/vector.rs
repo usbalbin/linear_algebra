@@ -226,7 +226,7 @@ impl<'a, T> ::std::ops::MulAssign<&'a Vector<T>> for Vector<T>
 
 //Vector * Matrix
 impl<'a, 'b, T> ::std::ops::Mul<&'b Matrix<T>> for &'a Vector<T>
-    where T: Copy + Mul<T, Output=T> + Add + ::std::iter::Sum + Parameter
+    where T: Copy + Mul<T, Output=T> + Add + Parameter
 {
     type Output = Vector<T>;
     fn mul(self, other_m: &'b Matrix<T>) -> Vector<T> {//TODO: check me
@@ -253,7 +253,7 @@ impl<'a, 'b, T> ::std::ops::Mul<&'b Matrix<T>> for &'a Vector<T>
 
 /// Compute vector * transpose(other_m), where transpose(other_m) is the transpose of matrix other_m
 pub fn mul_transpose_mat<T>(vector: &Vector<T>, other_m: &Matrix<T>) -> Vector<T>
-    where T: Copy + Mul<T, Output=T> + Add + ::std::iter::Sum + Parameter
+    where T: Copy + Mul<T, Output=T> + Add + Parameter
 {
     assert_eq!(vector.len(), other_m.get_col_count());
     let mut res = unsafe { Vector::uninitialized(other_m.get_row_count()) };

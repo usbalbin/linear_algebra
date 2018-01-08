@@ -161,8 +161,7 @@ impl<'a, 'b, T> ::std::ops::Mul<&'b Matrix<T>> for &'a Matrix<T>
     where T:
     Parameter +
         ::std::ops::Mul<T, Output=T> +
-        ::std::ops::Add<T, Output=T> +
-        ::std::iter::Sum
+        ::std::ops::Add<T, Output=T>
 {
     type Output = Matrix<T>;
     fn mul(self, other: &'b Matrix<T>) -> Matrix<T> {
