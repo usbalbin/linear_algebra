@@ -9,7 +9,7 @@ pub mod vector;
 pub mod traits;
 
 use traits::Parameter;
-//pub mod matrix;
+pub mod matrix;
 
 struct OclData {
     queue: ocl::ProQue,
@@ -31,6 +31,17 @@ struct OclData {
     div_assign_vec_scl: ocl::Kernel,
 
     eq_vec: ocl::Kernel,
+
+    //Matrix vec
+
+    mul_vec_mat: ocl::Kernel,
+    mul_vec_transpose_mat: ocl::Kernel,
+
+    //Matrix
+
+    mul_mat_mat_row: ocl::Kernel,
+    mul_mat_mat_col: ocl::Kernel,
+
 }
 
 
@@ -40,13 +51,13 @@ fn cl_data<T: Parameter>() -> &'static mut Option<OclData> {
 
     unsafe { //TODO: remove me to prevent bugs when multithreading
         INIT_ONCE.call_once(|| {
-            init_helper::<T>(&mut OCL_DATA);
+            init_cl::<T>(&mut OCL_DATA);
         });
         &mut OCL_DATA
     }
 }
 
-unsafe fn init_helper<T: Parameter>(ocl_data: &mut Option<OclData>) {
+unsafe fn init_cl<T: Parameter>(ocl_data: &mut Option<OclData>) {
     let src = if T::type_to_str() == "double" {
         "#pragma OPENCL EXTENSION cl_khr_fp64 : enable\n"
     } else {
@@ -115,7 +126,39 @@ unsafe fn init_helper<T: Parameter>(ocl_data: &mut Option<OclData>) {
         .arg_buf_named::<T, Buffer<T>>("A", None)
         .arg_buf_named::<T, Buffer<T>>("B", None);
 
+    //Matrix vec
 
+    let mul_vec_mat = queue.create_kernel("mul_vec_mat").unwrap()
+        .arg_buf_named::<T, Buffer<T>>("C", None)
+        .arg_buf_named::<T, Buffer<T>>("A", None)
+        .arg_buf_named::<T, Buffer<T>>("B", None)
+        .arg_scl_named::<i32>("B_col_count", None)
+        .arg_scl_named::<i32>("A_len", None);
+
+    let mul_vec_transpose_mat = queue.create_kernel("mul_vec_transpose_mat").unwrap()
+        .arg_buf_named::<T, Buffer<T>>("C", None)
+        .arg_buf_named::<T, Buffer<T>>("A", None)
+        .arg_buf_named::<T, Buffer<T>>("B", None)
+        .arg_scl_named::<i32>("B_col_count", None)
+        .arg_scl_named::<i32>("A_len", None);
+
+
+    //Matrix
+
+    let mul_mat_mat_row = queue.create_kernel("mul_mat_mat_row").unwrap()
+        .arg_buf_named::<T, Buffer<T>>("C", None)
+        .arg_buf_named::<T, Buffer<T>>("A", None)
+        .arg_buf_named::<T, Buffer<T>>("B", None)
+        .arg_scl_named::<i32>("C_col_count", None)
+        .arg_scl_named::<i32>("A_col_count", None);
+
+    let mul_mat_mat_col = queue.create_kernel("mul_mat_mat_col").unwrap()
+        .arg_buf_named::<T, Buffer<T>>("C", None)
+        .arg_buf_named::<T, Buffer<T>>("A", None)
+        .arg_buf_named::<T, Buffer<T>>("B", None)
+        .arg_scl_named::<i32>("C_row_count", None)
+        .arg_scl_named::<i32>("C_col_count", None)
+        .arg_scl_named::<i32>("A_col_count", None);
 
     *ocl_data = Some(OclData{
         queue,
@@ -137,6 +180,16 @@ unsafe fn init_helper<T: Parameter>(ocl_data: &mut Option<OclData>) {
         div_assign_vec_scl,
 
         eq_vec,
+
+        //Matrix vec
+
+        mul_vec_mat,
+        mul_vec_transpose_mat,
+
+        //Matrix
+
+        mul_mat_mat_row,
+        mul_mat_mat_col,
     });
 }
 
@@ -157,15 +210,28 @@ unsafe fn init_helper<T: Parameter>(ocl_data: &mut Option<OclData>) {
 
 
 
+#[test]
+pub fn vec_eq() {
+    use vector::*;
 
-/*
+    let a = Vector::from_vec(vec![1, 2, 3, 4]);
+    let b = Vector::from_vec(vec![1, 2, 3, 5]);
+    let c = Vector::from_vec(vec![1, 2, 3]);
+    let d = Vector::from_vec(vec![1, 2, 3, 4]);
+
+    assert_eq!(a, a);
+    assert_ne!(a, c);
+    assert_ne!(a, b);
+    assert_eq!(a, d);
+}
+
 #[test]
 pub fn vec_mat_mul() {
     use vector::*;
     use matrix::*;
 
     let a = Vector::from_vec(vec![1, 2, 3, 4]);
-    let b = Vector::from_vec(vec![5, 4, 9, 4]);
+    let b = Vector::from_vec(vec![5, 4, 9]);
     let m = Matrix::from_vec(vec![
         1, 0, 0,
         0, 2, 0,
@@ -174,23 +240,48 @@ pub fn vec_mat_mul() {
     ], 4, 3);
 
     let p = &a * &m;
-    println!("{}", p);
-    for (p, b) in p.iter().zip(b.iter()) {
-        assert_eq!(p, b);
-    }
+    assert_eq!(p, b);
 }
-*/
 
 #[test]
-pub fn vec_add_and_scalar_mul() {
+pub fn vec_transpose_mat_mul() {
+    use vector::*;
+    use matrix::*;
+
+    let a = Vector::from_vec(vec![1, 2, 3, 4]);
+    let b = Vector::from_vec(vec![5, 4, 9]);
+    let m = Matrix::from_vec(vec![
+        1, 0, 0, 1,
+        0, 2, 0, 0,
+        0, 0, 3, 0
+    ], 3, 4);
+
+    let p = mul_transpose_mat(&a, &m);
+    assert_eq!(p, b);
+}
+
+
+#[test]
+pub fn vec_add() {
     use vector::*;
 
     let a = Vector::from_vec(vec![1, 2, 3, 4]);
     let r = Vector::from_vec(vec![2, 4, 6, 8]);
 
     let s = &a + &a;
-    let p = &a * 2;
 
     assert_eq!(r, s);
-    assert_eq!(s, p);
+}
+
+#[test]
+pub fn vec_mul_scl() {
+    use vector::*;
+
+    let a = Vector::from_vec(vec![1, 2, 3, 4]);
+    let r = Vector::from_vec(vec![2, 4, 6, 8]);
+
+
+    let p = &a * 2;
+
+    assert_eq!(r, p);
 }

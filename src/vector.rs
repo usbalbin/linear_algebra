@@ -3,46 +3,18 @@ extern crate ocl;
 
 use ocl::{Buffer, MemFlags, Kernel};
 
-//use matrix::Matrix;
+use matrix::Matrix;
 
 use ::std::ops::{Add, Mul};
 
 use traits::Parameter;
 
 use cl_data;
-/*
-pub fn dot_it_it<'a, T, ItA, ItB>(a: ItA, b: ItB) -> T
-    where
-        T: 'a +
-            Copy +
-            ::std::ops::Mul +
-            ::std::iter::Sum<<T as ::std::ops::Mul>::Output> +
-            Parameter,
-        ItA: Iterator<Item = &'a T>,
-        ItB: Iterator<Item = &'a T>
-{
-    //assert_eq!(a.count(), b.count());
-    a.zip(b).map(|(x, y)| *x * *y).sum()
-}
 
-pub fn dot<'a, T, IT>(vector: &Vector<T>, it: IT) -> T
-    where
-        T: 'a +
-            Parameter +
-            Copy +
-            Add +
-            Mul +
-            ::std::iter::Sum<<T as ::std::ops::Mul>::Output>,
-        IT: Iterator<Item = &'a T>
-{
-    //assert_eq!(vector.len(), it.count());
-    vector.iter().zip(it).map(|(v, r)| *v * *r).sum()
-}
-*/
 pub struct Vector<T>
     where T: Parameter
 {
-    data: Buffer<T>
+    pub(crate) data: Buffer<T>
 }
 
 impl<T: Parameter> Vector<T> {
@@ -120,22 +92,6 @@ impl<T: Parameter> Vector<T> {
 
         unsafe { kernel.cmd().gws(self.len()).enq().unwrap(); }
     }
-
-    /*pub fn iter(&self) -> ::std::slice::Iter<T> {
-        self.data.iter()
-    }
-
-    pub fn iter_mut(&mut self) -> ::std::slice::IterMut<T> {
-        self.data.iter_mut()
-    }
-
-    pub fn chunks(&self, size: usize) -> ::std::slice::Chunks<T> {
-        self.data.chunks(size)
-    }
-
-    pub fn chunks_mut(&mut self, size: usize) -> ::std::slice::ChunksMut<T> {
-        self.data.chunks_mut(size)
-    }*/
 
     /// Applies p for every element in vector
     pub fn map_mut<F: FnMut(&mut T)>(&mut self, kernel: &mut Kernel) {
@@ -221,7 +177,7 @@ impl<'a, 'b, T> ::std::ops::Mul<T> for &'a Vector<T>
 }
 
 impl<T> ::std::ops::MulAssign<T> for Vector<T>
-    where T: Copy + ::std::ops::Mul<T, Output=T> + Parameter
+    where T: Copy + ::std::ops::MulAssign<T> + Parameter
 {
     fn mul_assign(&mut self, scalar: T) {
         let kernel = &mut cl_data::<T>().as_mut().unwrap().mul_assign_vec_scl;
@@ -234,7 +190,7 @@ impl<T> ::std::ops::MulAssign<T> for Vector<T>
 }
 
 impl<T> ::std::ops::Mul<T> for Vector<T>
-    where T: Copy + ::std::ops::Mul<T, Output=T> + Parameter
+    where T: Copy + ::std::ops::MulAssign<T> + Parameter
 {
     type Output = Vector<T>;
     fn mul(mut self, scalar: T) -> Vector<T> {
@@ -252,33 +208,60 @@ impl<'a, 'b, T> ::std::ops::Mul<&'b Vector<T>> for &'a Vector<T>
     }
 }
 
-/*impl<'a, 'b, T> ::std::ops::Mul<&'b Matrix<T>> for &'a Vector<T>
+impl<'a, T> ::std::ops::MulAssign<&'a Vector<T>> for Vector<T>
+    where T: Copy + ::std::ops::MulAssign<T> + Parameter
+{
+    fn mul_assign(&mut self, other: &'a Vector<T>) {
+        Vector::for_each_mut(self, other, &mut cl_data::<T>().as_mut().unwrap().mul_assign_vec_vec);
+    }
+}
+
+//Vector * Matrix
+impl<'a, 'b, T> ::std::ops::Mul<&'b Matrix<T>> for &'a Vector<T>
     where T: Copy + Mul<T, Output=T> + Add + ::std::iter::Sum + Parameter
 {
     type Output = Vector<T>;
     fn mul(self, other_m: &'b Matrix<T>) -> Vector<T> {//TODO: check me
         assert_eq!(self.len(), other_m.get_row_count());
-        let result =
-            (0..other_m.get_col_count())//For each column
-                .map(|i| dot(self, other_m.get_col(i)));
-        Vector {
-            data: result.collect()
-        }
+
+
+
+        let mut res = unsafe{ Vector::uninitialized(other_m.get_col_count()) };
+
+        let kernel = &mut cl_data::<T>().as_mut().unwrap().mul_vec_mat;
+
+        kernel.set_arg_buf_named("C", Some(&mut res.data)).unwrap();
+        kernel.set_arg_buf_named("A", Some(&self.data)).unwrap();
+        kernel.set_arg_buf_named("B", Some(&other_m.data.data)).unwrap();
+
+        kernel.set_arg_scl_named::<i32>("B_col_count", other_m.get_col_count() as i32).unwrap();
+        kernel.set_arg_scl_named::<i32>("A_len", self.len() as i32).unwrap();
+
+        unsafe { kernel.cmd().gws(res.len()).enq().unwrap(); }
+
+        res
     }
 }
 
-/// Compute vector * other_m^-1, where other_m^-1 is the transpose of matrix other_m
+/// Compute vector * transpose(other_m), where transpose(other_m) is the transpose of matrix other_m
 pub fn mul_transpose_mat<T>(vector: &Vector<T>, other_m: &Matrix<T>) -> Vector<T>
     where T: Copy + Mul<T, Output=T> + Add + ::std::iter::Sum + Parameter
 {
     assert_eq!(vector.len(), other_m.get_col_count());
-    let result =
-        (0..other_m.get_row_count())//For each row
-            .map(|i| dot(vector, other_m.get_row(i)));
-    Vector{
-        data: result.collect()
-    }
-}*/
+    let mut res = unsafe { Vector::uninitialized(other_m.get_row_count()) };
+
+    let kernel = &mut cl_data::<T>().as_mut().unwrap().mul_vec_transpose_mat;
+
+    kernel.set_arg_buf_named("C", Some(&mut res.data)).unwrap();
+    kernel.set_arg_buf_named("A", Some(&vector.data)).unwrap();
+    kernel.set_arg_buf_named("B", Some(&other_m.data.data)).unwrap();
+
+    kernel.set_arg_scl_named::<i32>("B_col_count", other_m.get_col_count() as i32).unwrap();
+    kernel.set_arg_scl_named::<i32>("A_len", vector.len() as i32).unwrap();
+
+    unsafe { kernel.cmd().gws(res.len()).enq().unwrap(); }
+    res
+}
 
 impl<'a, 'b, T> ::std::ops::Div<&'b Vector<T>> for &'a Vector<T>
     where T: Copy + ::std::ops::Div<T, Output=T> + Parameter
@@ -286,6 +269,14 @@ impl<'a, 'b, T> ::std::ops::Div<&'b Vector<T>> for &'a Vector<T>
     type Output = Vector<T>;
     fn div(self, other: &'b Vector<T>) -> Vector<T> {
         Vector::from_for_each2(self, other, &mut cl_data::<T>().as_mut().unwrap().div_vec_vec)
+    }
+}
+
+impl<'a, T> ::std::ops::DivAssign<&'a Vector<T>> for Vector<T>
+    where T: Copy + ::std::ops::DivAssign<T> + Parameter
+{
+    fn div_assign(&mut self, other: &'a Vector<T>) {
+        Vector::for_each_mut(self, other, &mut cl_data::<T>().as_mut().unwrap().div_assign_vec_vec);
     }
 }
 
@@ -309,10 +300,27 @@ impl<'a, 'b, T> ::std::ops::Div<T> for &'a Vector<T>
     }
 }
 
+impl<T> ::std::ops::DivAssign<T> for Vector<T>
+    where T: Copy + ::std::ops::DivAssign<T> + Parameter
+{
+    fn div_assign(&mut self, scalar: T) {
+        let kernel = &mut cl_data::<T>().as_mut().unwrap().div_assign_vec_scl;
+
+        kernel.set_arg_buf_named("C", Some(&mut self.data)).unwrap();
+        kernel.set_arg_scl_named("B", scalar).unwrap();
+
+        unsafe { kernel.cmd().gws(self.len()).enq().unwrap(); }
+    }
+}
+
 impl<'a, 'b, T> ::std::cmp::PartialEq for Vector<T>
     where T: Copy + ::std::cmp::Eq + Parameter
 {
     fn eq(&self, other: &Vector<T>) -> bool {
+        if self.len() != other.len() {
+            return false;
+        }
+
         let kernel = &mut cl_data::<T>().as_mut().unwrap().eq_vec;
 
         let mut is_equal = Vector::from_vec(vec![1u8]);
@@ -327,18 +335,6 @@ impl<'a, 'b, T> ::std::cmp::PartialEq for Vector<T>
     }
 }
 
-/*impl<T: Parameter> ::std::ops::IndexMut<usize> for Vector<T> {
-    fn index_mut<'a>(&'a mut self, index: usize) -> &'a mut T {
-        &mut self.data[index]
-    }
-}
-
-impl<T: Parameter> ::std::ops::Index<usize> for Vector<T> {
-    type Output = T;
-    fn index<'a>(&'a self, index: usize) -> &'a T {
-        &self.data[index]
-    }
-}*/
 
 impl<T: Parameter + ::std::fmt::Display + Clone> ::std::fmt::Display for Vector<T> {
     fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result{

@@ -1,38 +1,18 @@
 
+extern crate ocl;
 
+use cl_data;
+use traits::Parameter;
 use vector::*;
 
-//Iterate through every value in given row
-pub struct Row<'a, T: 'a> {
-    it: ::std::iter::Take<::std::iter::Skip<::std::slice::Iter<'a, T>>>
-}
 
-impl<'a, T: Copy> Iterator for Row<'a, T> {
-    type Item = &'a T;
-    fn next(&mut self) -> Option<&'a T> {
-        self.it.next()
-    }
-}
-
-//Iterate through every value in given column
-pub struct Column<'a, T: 'a> {
-    it: ::std::iter::Take<::std::iter::StepBy<::std::iter::Skip<::std::slice::Iter<'a, T>>>>
-}
-
-impl<'a, T> Iterator for Column<'a, T> {
-    type Item = &'a T;
-    fn next(&mut self) -> Option<&'a T> {
-        self.it.next()
-    }
-}
-
-pub struct Matrix<T> {
-    data: Vector<T>,
+pub struct Matrix<T: Parameter> {
+    pub(crate) data: Vector<T>,
     row_count: usize,
     col_count: usize
 }
 
-impl<T> Matrix<T> {
+impl<T: Parameter> Matrix<T> {
     pub fn new(default_value: T, row_count: usize, col_count: usize) -> Matrix<T>
         where T: Copy
     {
@@ -60,9 +40,9 @@ impl<T> Matrix<T> {
         }
     }
 
-    pub fn generate<F: FnMut(usize)-> T>(f: F, row_count: usize, col_count: usize) -> Matrix<T> {
+    pub fn generate<F: FnMut(usize)-> T>(kernel: &mut ocl::Kernel, row_count: usize, col_count: usize) -> Matrix<T> {
         Matrix {
-            data: Vector::generate(f, row_count * col_count),
+            data: Vector::generate(kernel, row_count * col_count),
             row_count,
             col_count
         }
@@ -79,24 +59,10 @@ impl<T> Matrix<T> {
     pub fn get_col_count(&self) -> usize {
         self.col_count
     }
-
-    pub fn get_row(&self, row: usize) -> Row<T> {
-        assert!(row < self.get_row_count());
-        Row {
-            it: self.data.iter().skip(row * self.col_count).take(self.col_count)
-        }
-    }
-
-    pub fn get_col(&self, column: usize) -> Column<T> {
-        assert!(column < self.get_col_count());
-        Column {
-            it: self.data.iter().skip(column).step_by(self.col_count).take(self.row_count)
-        }
-    }
 }
 
 
-impl<'a, 'b, T: Copy + ::std::ops::Add<T, Output=T>> ::std::ops::Add<&'b Matrix<T>> for &'a Matrix<T> {
+impl<'a, 'b, T: Parameter + ::std::ops::Add<T, Output=T>> ::std::ops::Add<&'b Matrix<T>> for &'a Matrix<T> {
     type Output = Matrix<T>;
     fn add(self, other: &'b Matrix<T>) -> Matrix<T> {
         assert_eq!(self.row_count, other.row_count);
@@ -110,7 +76,7 @@ impl<'a, 'b, T: Copy + ::std::ops::Add<T, Output=T>> ::std::ops::Add<&'b Matrix<
     }
 }
 
-impl<'a, T: Copy + ::std::ops::AddAssign<T>> ::std::ops::AddAssign<&'a Matrix<T>> for Matrix<T> {
+impl<'a, T: Parameter + ::std::ops::AddAssign<T>> ::std::ops::AddAssign<&'a Matrix<T>> for Matrix<T> {
     fn add_assign(&mut self, other: &'a Matrix<T>) {
         assert_eq!(self.row_count, other.row_count);
         assert_eq!(self.col_count, other.col_count);
@@ -118,7 +84,7 @@ impl<'a, T: Copy + ::std::ops::AddAssign<T>> ::std::ops::AddAssign<&'a Matrix<T>
     }
 }
 
-impl<'a, T: Copy + ::std::ops::AddAssign<T>> ::std::ops::Add<&'a Matrix<T>> for Matrix<T> {
+impl<'a, T: Parameter + ::std::ops::AddAssign<T>> ::std::ops::Add<&'a Matrix<T>> for Matrix<T> {
     type Output = Matrix<T>;
     fn add(mut self, other: &'a Matrix<T>) -> Matrix<T> {
         self += other;
@@ -126,7 +92,7 @@ impl<'a, T: Copy + ::std::ops::AddAssign<T>> ::std::ops::Add<&'a Matrix<T>> for 
     }
 }
 
-impl<'a, 'b, T: Copy + ::std::ops::Sub<T, Output=T>> ::std::ops::Sub<&'b Matrix<T>> for &'a Matrix<T> {
+impl<'a, 'b, T: Parameter + ::std::ops::Sub<T, Output=T>> ::std::ops::Sub<&'b Matrix<T>> for &'a Matrix<T> {
     type Output = Matrix<T>;
     fn sub(self, other: &'b Matrix<T>) -> Matrix<T> {
         assert_eq!(self.row_count, other.row_count);
@@ -140,7 +106,7 @@ impl<'a, 'b, T: Copy + ::std::ops::Sub<T, Output=T>> ::std::ops::Sub<&'b Matrix<
     }
 }
 
-impl<'a, T: Copy + ::std::ops::SubAssign<T>> ::std::ops::SubAssign<&'a Matrix<T>> for Matrix<T> {
+impl<'a, T: Parameter + ::std::ops::SubAssign<T>> ::std::ops::SubAssign<&'a Matrix<T>> for Matrix<T> {
     fn sub_assign(&mut self, other: &'a Matrix<T>) {
         assert_eq!(self.row_count, other.row_count);
         assert_eq!(self.col_count, other.col_count);
@@ -148,7 +114,7 @@ impl<'a, T: Copy + ::std::ops::SubAssign<T>> ::std::ops::SubAssign<&'a Matrix<T>
     }
 }
 
-impl<'a, T: Copy + ::std::ops::SubAssign<T>> ::std::ops::Sub<&'a Matrix<T>> for Matrix<T> {
+impl<'a, T: Parameter + ::std::ops::SubAssign<T>> ::std::ops::Sub<&'a Matrix<T>> for Matrix<T> {
     type Output = Matrix<T>;
     fn sub(mut self, other: &'a Matrix<T>) -> Matrix<T> {
         self -= other;
@@ -157,7 +123,7 @@ impl<'a, T: Copy + ::std::ops::SubAssign<T>> ::std::ops::Sub<&'a Matrix<T>> for 
 }
 
 //Mul with scalar
-impl<'a, 'b, T: Copy + ::std::ops::Mul<T, Output=T>> ::std::ops::Mul<T> for &'a Matrix<T> {
+impl<'a, 'b, T: Parameter + ::std::ops::Mul<T, Output=T>> ::std::ops::Mul<T> for &'a Matrix<T> {
     type Output = Matrix<T>;
     fn mul(self, scalar: T) -> Matrix<T> {
         Matrix {
@@ -168,13 +134,13 @@ impl<'a, 'b, T: Copy + ::std::ops::Mul<T, Output=T>> ::std::ops::Mul<T> for &'a 
     }
 }
 
-impl<'a, 'b, T: Copy + ::std::ops::Mul<T, Output=T>> ::std::ops::MulAssign<T> for Matrix<T> {
+impl<'a, 'b, T: Parameter + ::std::ops::MulAssign<T>> ::std::ops::MulAssign<T> for Matrix<T> {
     fn mul_assign(&mut self, scalar: T) {
         self.data *= scalar;
     }
 }
 
-impl<'a, 'b, T: Copy + ::std::ops::Mul<T, Output=T>> ::std::ops::Mul<T> for Matrix<T> {
+impl<'a, 'b, T: Parameter + ::std::ops::MulAssign<T>> ::std::ops::Mul<T> for Matrix<T> {
     type Output = Matrix<T>;
     fn mul(mut self, scalar: T) -> Matrix<T> {
         self *= scalar;
@@ -185,7 +151,7 @@ impl<'a, 'b, T: Copy + ::std::ops::Mul<T, Output=T>> ::std::ops::Mul<T> for Matr
 
 impl<'a, 'b, T> ::std::ops::Mul<&'b Matrix<T>> for &'a Matrix<T>
     where T:
-        Copy +
+    Parameter +
         ::std::ops::Mul<T, Output=T> +
         ::std::ops::Add<T, Output=T> +
         ::std::iter::Sum
@@ -193,45 +159,42 @@ impl<'a, 'b, T> ::std::ops::Mul<&'b Matrix<T>> for &'a Matrix<T>
     type Output = Matrix<T>;
     fn mul(self, other: &'b Matrix<T>) -> Matrix<T> {
         assert_eq!(self.col_count, other.row_count);
-
-        let mut res = unsafe{ Matrix::uninitialized(self.row_count, other.col_count) };
-
-        for row in 0..res.row_count {
-            for col in 0..res.col_count {
-                res.data[row * res.col_count + col] = dot_it_it(self.get_row(row), other.get_col(col));
-            }
-        }
-        res
+        mul_helper(&self.data.data, &other.data.data, self.row_count, self.col_count, other.col_count)
     }
 }
 
 /// Multiplies two vectors as if they where one one-column-matrix and one one-row-matrix respectively
 /// resulting in a matrix with row.len() columns and col.len() rows
-pub fn mul_column_row<T: ::std::ops::Mul<T, Output=T> + Copy>(column: &Vector<T>, row: &Vector<T>) -> Matrix<T> {
-    let col_count = row.len();
-    let row_count = column.len();
-    let mut data = Vec::with_capacity(col_count * row_count);
-    unsafe {
-        data.set_len(col_count * row_count);
-    }
+pub fn mul_column_row<T: Parameter + ::std::ops::Mul<T, Output=T>>(column: &Vector<T>, row: &Vector<T>) -> Matrix<T> {
+    mul_helper(&column.data, &row.data, column.len(), 1, row.len())
+}
 
-    for row_index in 0..row_count {
-        for col_index in 0..col_count {
-            data[row_index * col_count + col_index] = column[row_index] * row[col_index];
-        }
-    }
+fn mul_helper<T: Parameter>(a: &ocl::Buffer<T>, b: &ocl::Buffer<T>, a_row_count: usize, a_col_count: usize, b_col_count: usize) -> Matrix<T> {
 
-    Matrix{
-        data: Vector::from_vec(
-            data
-        ),
-        row_count,
-        col_count
-    }
+    let mut res = unsafe{ Matrix::uninitialized(a_row_count, b_col_count) };
+
+    let kernel;
+    if res.col_count > res.row_count {
+        kernel = &mut cl_data::<T>().as_mut().unwrap().mul_mat_mat_col;
+        kernel.set_arg_scl_named::<i32>("C_row_count", res.row_count as i32).unwrap();
+    } else {
+        kernel = &mut cl_data::<T>().as_mut().unwrap().mul_mat_mat_row;
+    };
+
+    kernel.set_arg_buf_named("C", Some(&mut res.data.data)).unwrap();
+    kernel.set_arg_buf_named("A", Some(a)).unwrap();
+    kernel.set_arg_buf_named("B", Some(b)).unwrap();
+
+    kernel.set_arg_scl_named::<i32>("C_col_count", res.col_count as i32).unwrap();
+    kernel.set_arg_scl_named::<i32>("A_col_count", a_col_count as i32).unwrap();
+
+    unsafe { kernel.cmd().gws(res.len()).enq().unwrap(); }
+
+    res
 }
 
 //Div by scalar
-impl<'a, 'b, T: Copy + ::std::ops::Div<T, Output=T>> ::std::ops::Div<T> for &'a Matrix<T> {
+impl<'a, 'b, T: Parameter + ::std::ops::Div<T, Output=T>> ::std::ops::Div<T> for &'a Matrix<T> {
     type Output = Matrix<T>;
     fn div(self, scalar: T) -> Matrix<T> {
         Matrix {
@@ -242,13 +205,14 @@ impl<'a, 'b, T: Copy + ::std::ops::Div<T, Output=T>> ::std::ops::Div<T> for &'a 
     }
 }
 
-impl<T: ::std::fmt::Display> ::std::fmt::Display for Matrix<T> {
+impl<T: Parameter + ::std::fmt::Display> ::std::fmt::Display for Matrix<T> {
     fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        let v = self.data.to_vec();
         writeln!(f, "Mat{}x{} {{", self.row_count, self.col_count)?;
         for row in 0..self.row_count {
-            write!(f, "\t {}", self.data[row * self.col_count + 0])?;
+            write!(f, "\t {}", v[row * self.col_count + 0])?;
             for col in 1..self.col_count {
-                write!(f, ", {}", self.data[row * self.col_count + col])?;
+                write!(f, ", {}",v[row * self.col_count + col])?;
             }
             writeln!(f)?;
         }
