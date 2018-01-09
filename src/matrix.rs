@@ -180,13 +180,7 @@ fn mul_helper<T: Parameter>(a: &ocl::Buffer<T>, b: &ocl::Buffer<T>, a_row_count:
 
     let mut res = unsafe{ Matrix::uninitialized(a_row_count, b_col_count) };
 
-    let kernel;
-    if res.col_count > res.row_count {
-        kernel = &mut cl_data::<T>().as_mut().unwrap().mul_mat_mat_col;
-        kernel.set_arg_scl_named::<i32>("C_row_count", res.row_count as i32).unwrap();
-    } else {
-        kernel = &mut cl_data::<T>().as_mut().unwrap().mul_mat_mat_row;
-    };
+    let kernel = &mut cl_data::<T>().as_mut().unwrap().mul_mat_mat;
 
     kernel.set_arg_buf_named("C", Some(&mut res.data.data)).unwrap();
     kernel.set_arg_buf_named("A", Some(a)).unwrap();
@@ -195,7 +189,7 @@ fn mul_helper<T: Parameter>(a: &ocl::Buffer<T>, b: &ocl::Buffer<T>, a_row_count:
     kernel.set_arg_scl_named::<i32>("C_col_count", res.col_count as i32).unwrap();
     kernel.set_arg_scl_named::<i32>("A_col_count", a_col_count as i32).unwrap();
 
-    unsafe { kernel.cmd().gws(res.len()).enq().unwrap(); }
+    unsafe { kernel.cmd().gws(res.get_col_count() * res.get_row_count()).enq().unwrap(); }
 
     res
 }
@@ -209,6 +203,31 @@ impl<'a, 'b, T: Parameter + ::std::ops::Div<T, Output=T>> ::std::ops::Div<T> for
             row_count: self.row_count,
             col_count: self.col_count
         }
+    }
+}
+
+impl<'a, 'b, T> ::std::cmp::PartialEq for Matrix<T>
+    where T: Copy + ::std::cmp::Eq + Parameter
+{
+    fn eq(&self, other: &Matrix<T>) -> bool {
+        self.row_count == other.row_count &&
+            self.col_count == other.col_count &&
+            self.data == other.data
+    }
+}
+
+impl<T: Parameter + ::std::fmt::Debug> ::std::fmt::Debug for Matrix<T> {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        let v = self.data.to_vec();
+        writeln!(f, "Mat{}x{} {{", self.row_count, self.col_count)?;
+        for row in 0..self.row_count {
+            write!(f, "\t {:?}", v[row * self.col_count + 0])?;
+            for col in 1..self.col_count {
+                write!(f, ", {:?}",v[row * self.col_count + col])?;
+            }
+            writeln!(f)?;
+        }
+        writeln!(f, "}}")
     }
 }
 

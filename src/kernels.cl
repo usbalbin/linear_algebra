@@ -103,6 +103,19 @@ kernel void mul_vec_transpose_mat(global {T}* C, global {T}* A, global {T}* B, i
 //--------------------------------------------------- Matrix ----------------------------------------------------------
 //---------------------------------------------------------------------------------------------------------------------
 
+//TODO make 1D or 2D kernel out of mul_mat_mat without for-loop
+
+kernel void mul_mat_mat(global {T}* C, global {T}* A, global {T}* B, int C_col_count, int A_col_count) {
+    //C.row_count = A.row_count
+    //C.col_count = B.col_count
+    //A.col_count = B.row_count
+    int row = i / C_col_count;
+    int col = i % C_col_count;
+
+    C[i] = dot_product(&A[A_col_count * row], 1, &B[col], C_col_count, A_col_count);
+}
+
+
 //Iterates over one row per work item
 #define row get_global_id(0)
 kernel void mul_mat_mat_row(global {T}* C, global {T}* A, global {T}* B, int C_col_count, int A_col_count) {

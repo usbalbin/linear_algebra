@@ -39,8 +39,7 @@ struct OclData {
 
     //Matrix
 
-    mul_mat_mat_row: ocl::Kernel,
-    mul_mat_mat_col: ocl::Kernel,
+    mul_mat_mat: ocl::Kernel,
 
 }
 
@@ -169,18 +168,10 @@ unsafe fn init_cl<T: Parameter>(ocl_data: &mut Option<OclData>) {
 
     //Matrix
 
-    let mul_mat_mat_row = queue.create_kernel("mul_mat_mat_row").unwrap()
+    let mul_mat_mat = queue.create_kernel("mul_mat_mat").unwrap()
         .arg_buf_named::<T, Buffer<T>>("C", None)
         .arg_buf_named::<T, Buffer<T>>("A", None)
         .arg_buf_named::<T, Buffer<T>>("B", None)
-        .arg_scl_named::<i32>("C_col_count", None)
-        .arg_scl_named::<i32>("A_col_count", None);
-
-    let mul_mat_mat_col = queue.create_kernel("mul_mat_mat_col").unwrap()
-        .arg_buf_named::<T, Buffer<T>>("C", None)
-        .arg_buf_named::<T, Buffer<T>>("A", None)
-        .arg_buf_named::<T, Buffer<T>>("B", None)
-        .arg_scl_named::<i32>("C_row_count", None)
         .arg_scl_named::<i32>("C_col_count", None)
         .arg_scl_named::<i32>("A_col_count", None);
 
@@ -212,8 +203,7 @@ unsafe fn init_cl<T: Parameter>(ocl_data: &mut Option<OclData>) {
 
         //Matrix
 
-        mul_mat_mat_row,
-        mul_mat_mat_col,
+        mul_mat_mat,
     });
 }
 
@@ -235,7 +225,7 @@ unsafe fn init_cl<T: Parameter>(ocl_data: &mut Option<OclData>) {
 
 
 #[test]
-pub fn vec_eq() {
+fn vec_eq() {
     use vector::*;
 
     let a = Vector::from_vec(vec![1, 2, 3, 4]);
@@ -250,7 +240,7 @@ pub fn vec_eq() {
 }
 
 #[test]
-pub fn vec_mat_mul() {
+fn vec_mat_mul() {
     use vector::*;
     use matrix::*;
 
@@ -265,6 +255,29 @@ pub fn vec_mat_mul() {
 
     let p = &a * &m;
     assert_eq!(p, b);
+}
+
+#[test]
+fn mat_mat_mul() {
+    use matrix::*;
+
+    let a = Matrix::from_vec(vec![
+        1, 2, 3,
+        4, 5, 6,
+    ], 2, 3);
+
+    let b = Matrix::from_vec(vec![
+        7, 8,
+        9, 10,
+        11, 12
+    ], 3, 2);
+
+    let c = Matrix::from_vec(vec![
+        58, 64,
+        139, 154
+    ], 2, 2);
+
+    assert_eq!(c, &a * &b);
 }
 
 #[test]
