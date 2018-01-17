@@ -79,24 +79,10 @@ fn load_extra_src() -> Result<String, std::io::Error> {
 }
 
 unsafe fn init_cl<T: Parameter>(ocl_data: &mut Option<OclData>) {
-    let extra_src = load_extra_src().unwrap_or_default();
-    let src = if T::type_to_str() == "double" {
-        "#pragma OPENCL EXTENSION cl_khr_fp64 : enable\n"
-    } else {
-        ""
-    }.to_owned();
-    let src = src + include_str!("kernels.cl")  + "\n" + &extra_src;
-    let src = src.replace("{T}", T::type_to_str());
+    let queue = setup_queue::<T>();
 
-    let queue = match ProQue::builder()
-        .device(ocl::flags::DEVICE_TYPE_GPU)
-        .src(src)
-        .build()
-        {
-            Err(e) => panic!("Failed to compile kernels with error: {}", e),
-            Ok(q) => q,
-        };
-
+    #[cfg(test)]
+    println!("\nPicked device: {}, {}", queue.device().vendor(), queue.device().name());
 
     let add_vec_vec = queue.create_kernel("add_vec_vec").unwrap()
         .arg_buf_named::<T, Buffer<T>>("C", None)
@@ -208,20 +194,55 @@ unsafe fn init_cl<T: Parameter>(ocl_data: &mut Option<OclData>) {
 }
 
 
+unsafe fn setup_queue<T: Parameter>() -> ProQue {
+    let src = get_src::<T>();
 
+    let mut builder = ProQue::builder();
 
+    let queue = if let Some((platform, device)) = get_gpu::<T>() {
+        builder
+            .platform(platform)
+            .device(device)
+    } else {
+        builder
+            .device(ocl::flags::DEVICE_TYPE_ALL)
+    };
 
+    match queue
+        .src(src)
+        .build()
+    {
+        Err(e) => panic!("Failed to compile kernels with error: {}", e),
+        Ok(q) => q,
+    }
+}
 
+fn get_src<T: Parameter>() -> String {
+    let extra_src = load_extra_src().unwrap_or_default();
+    let src = if T::type_to_str() == "double" {
+        "#pragma OPENCL EXTENSION cl_khr_fp64 : enable\n"
+    } else {
+        ""
+    }.to_owned();
+    let src = src + include_str!("kernels.cl") + "\n" + &extra_src;
+    let src = src.replace("{T}", T::type_to_str());
+    src
+}
 
-
-
-
-
-
-
-
-
-
+fn get_gpu<T: Parameter>() -> Option<(ocl::Platform, ocl::Device)> {
+    let platforms = ocl::Platform::list();
+    for platform in platforms {
+        let devices =
+            match ocl::Device::list(platform, Some(ocl::flags::DEVICE_TYPE_GPU)) {
+                Ok(d) => d,
+                Err(_) => continue,
+            };
+        for d in devices {
+            return Some((platform, d));
+        }
+    }
+    None
+}
 
 
 #[test]
