@@ -4,7 +4,8 @@ extern crate ocl;
 use cl_data;
 use traits::Parameter;
 use vector::*;
-
+use vector::write_u64;
+use vector::read_u64;
 
 pub struct Matrix<T: Parameter> {
     pub(crate) data: Vector<T>,
@@ -66,6 +67,64 @@ impl<T: Parameter> Matrix<T> {
 
     pub unsafe fn get_buffer_mut(&mut self) -> &mut ocl::Buffer<T> {
         self.data.get_buffer_mut()
+    }
+
+    /// Append Vector data to file.
+    /// NOTE! Vector will be encoded in the current systems endianness
+    ///
+    /// Two u64 will be placed first, representing the number of bytes per element and the
+    /// number of elements respectively.
+    pub fn write_to_file(&self, file: &mut ::std::fs::File) -> ::std::result::Result<(), ::std::io::Error> {
+
+        write_u64(file, ::std::mem::size_of::<T>() as  u64)?;         //Store element size in bytes
+
+        write_u64(file, self.row_count as u64)?;                      //Store row count
+        write_u64(file, self.col_count as u64)?;                      //Store column count
+
+        self.data.write_file_only_data(file)                             //Store data
+    }
+
+    /// Read data to from file.
+    /// NOTE! Buffer will be interpreted in the current systems endianness
+    pub unsafe fn read_from_file(file: &mut ::std::fs::File) -> Result<Matrix<T>, ::std::io::Error> {
+        let elem_size = read_u64(file)?;
+
+
+        if (elem_size as usize) != ::std::mem::size_of::<T>() {
+            panic!(
+                "Elem size from buffer does not seem to match, what was expected!\
+                 Missmatch in endiannes?"
+            );
+        }
+
+        let row_count = read_u64(file)? as usize;
+        let col_count = read_u64(file)? as usize;
+
+        Ok(Matrix {
+            data: Vector::<T>::read_file_only_data(file, (row_count * col_count) as u64)?,
+            row_count,
+            col_count
+        })
+    }
+
+    /// Save Vector to specified path.
+    /// NOTE! The file will be encoded in the current systems endianness
+    pub fn save(&self, path: &str) -> Result<(), ::std::io::Error> {
+        use std::fs::File;
+
+        let mut file = File::create(path)?;
+
+        self.write_to_file(&mut file)
+    }
+
+    /// Open Vector from specified path.
+    /// NOTE! The file will be interpreted in the current systems endianness
+    pub unsafe fn open(path: &str) -> Result<Matrix<T>, ::std::io::Error> {
+        use std::fs::File;
+
+        let mut file = File::open(path).expect("Failed to open file");
+
+        Ok(Self::read_from_file(&mut file).expect("Failed to read all data from file"))
     }
 }
 

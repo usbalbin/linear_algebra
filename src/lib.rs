@@ -317,7 +317,6 @@ pub fn vec_transpose_mat_mul() {
     assert_eq!(p, b);
 }
 
-
 #[test]
 pub fn vec_add() {
     use vector::*;
@@ -344,7 +343,7 @@ pub fn vec_mul_scl() {
 }
 
 #[test]
-pub fn save_load() {
+pub fn save_load_vec() {
     use vector::*;
     let path = "vec.tmp";
 
@@ -354,6 +353,23 @@ pub fn save_load() {
     let b = unsafe{ Vector::<TestType>::open(path).unwrap() };
     ::std::fs::remove_file(path).unwrap();
 
+
+    assert_eq!(a, b);
+}
+
+#[test]
+pub fn save_load_mat() {
+    use matrix::*;
+    let path = "vec.tmp";
+
+    let a: Matrix<TestType> = Matrix::from_vec(vec![
+        0x01_23_45_67, 0x89_AB_CD_EF, 0x13_57_9B_DF,
+        0xFE_DC_BA_98, 0x76_54_32_10, 0x02_46_8A_CE
+    ], 2, 3);
+    a.save(path).unwrap();
+
+    let b = unsafe{ Matrix::<TestType>::open(path).unwrap() };
+    ::std::fs::remove_file(path).unwrap();
 
     assert_eq!(a, b);
 }
