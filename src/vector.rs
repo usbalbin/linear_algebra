@@ -118,7 +118,103 @@ impl<T: Parameter> Vector<T> {
     pub unsafe fn get_buffer_mut(&mut self) -> &mut ocl::Buffer<T> {
         &mut self.data
     }
+
+    /// Append Vector data to file.
+    /// NOTE! Vector will be encoded in the current systems endianness
+    ///
+    /// Two u64 will be placed first, representing the number of bytes per element and the
+    /// number of elements respectively.
+    pub fn write_to_file(&self, file: &mut ::std::fs::File) -> ::std::result::Result<(), ::std::io::Error> {
+        use std::slice;
+        use std::io::Write;
+        use std::mem::transmute;
+
+        let data = self.to_vec();
+        unsafe {
+
+            let elem_size: u64 = ::std::mem::size_of::<T>() as u64;
+            let elem_size: [u8; 8] = transmute(elem_size);
+
+            file.write_all(&elem_size)?;                    //Store element size in bytes
+
+            let elem_count: u64 = self.len() as u64;
+            let elem_count: [u8; 8] = transmute(elem_count);
+
+            file.write_all(&elem_count)?;                   //Store element count
+
+            let data: &[u8] = slice::from_raw_parts(
+                data.as_ptr() as *const u8,
+                data.len() * ::std::mem::size_of::<T>(),
+            );
+            file.write_all(data)                            //Store data
+        }
+    }
+
+    /// Read data to from file.
+    /// NOTE! Buffer will be interpreted in the current systems endianness
+    pub unsafe fn read_from_file(file: &mut ::std::fs::File) -> Result<Vector<T>, ::std::io::Error> {
+        use std::io::Read;
+
+
+        let elem_size = read_u64(file)?;
+
+
+        if (elem_size as usize) != ::std::mem::size_of::<T>() {
+            panic!(
+                "Elem size from buffer does not seem to match, what was expected!\
+                 Missmatch in endiannes?"
+            );
+        }
+
+        let elem_count = read_u64(file)?;
+
+        let mut data = Vec::with_capacity(elem_count as usize);
+        let mut raw = Vec::with_capacity(::std::mem::size_of::<T>());
+        for _ in 0..(elem_count) {
+            for _ in 0..elem_size { //TODO: Check if this needs to be reversed
+                let mut byte = [0u8];
+                file.read_exact(&mut byte)?;
+                raw.push(byte);
+            }
+            let elem = *(raw[..].as_ptr() as *const T);
+            data.push(elem);
+            raw.clear();
+        }
+
+        Ok(Vector::from_vec(data))
+    }
+
+    /// Save Vector to specified path.
+    /// NOTE! The file will be encoded in the current systems endianness
+    pub fn save(&self, path: &str) -> Result<(), ::std::io::Error> {
+        use std::fs::File;
+
+        let mut file = File::create(path)?;
+
+        self.write_to_file(&mut file)
+    }
+
+    /// Open Vector from specified path.
+    /// NOTE! The file will be interpreted in the current systems endianness
+    pub unsafe fn open(path: &str) -> Result<Vector<T>, ::std::io::Error> {
+        use std::fs::File;
+
+        let mut file = File::open(path).expect("Failed to open file");
+
+        Ok(Vector::<T>::read_from_file(&mut file).expect("Failed to read all data from file"))
+    }
 }
+
+/// Read u64 to from file.
+/// NOTE! File will be interpreted in the current systems endianness
+unsafe fn read_u64(file: &mut ::std::fs::File) -> Result<u64, ::std::io::Error> {
+    use std::io::Read;
+
+    let mut elem_size = [0u8; 8];
+    file.read_exact(&mut elem_size)?;
+    Ok(::std::mem::transmute(elem_size))
+}
+
 
 impl<'a, 'b, T> ::std::ops::Add<&'b Vector<T>> for &'a Vector<T>
     where T: Copy + ::std::ops::Add<T, Output=T> + Parameter

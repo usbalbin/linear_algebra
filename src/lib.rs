@@ -43,12 +43,11 @@ struct OclData {
 
 }
 
-
 fn cl_data<T: Parameter>() -> &'static mut Option<OclData> {
     static mut OCL_DATA: Option<OclData> = None;
     static INIT_ONCE: std::sync::Once = std::sync::ONCE_INIT;
 
-    unsafe { //TODO: remove me to prevent bugs when multithreading
+    unsafe { //TODO: Investigate potential issues when multithreading
         INIT_ONCE.call_once(|| {
             init_cl::<T>(&mut OCL_DATA);
         });
@@ -245,14 +244,16 @@ fn get_gpu<T: Parameter>() -> Option<(ocl::Platform, ocl::Device)> {
 }
 
 
+type TestType = u32;
+
 #[test]
 fn vec_eq() {
     use vector::*;
 
-    let a = Vector::from_vec(vec![1, 2, 3, 4]);
-    let b = Vector::from_vec(vec![1, 2, 3, 5]);
-    let c = Vector::from_vec(vec![1, 2, 3]);
-    let d = Vector::from_vec(vec![1, 2, 3, 4]);
+    let a: Vector<TestType> = Vector::from_vec(vec![1, 2, 3, 4]);
+    let b: Vector<TestType> = Vector::from_vec(vec![1, 2, 3, 5]);
+    let c: Vector<TestType> = Vector::from_vec(vec![1, 2, 3]);
+    let d: Vector<TestType> = Vector::from_vec(vec![1, 2, 3, 4]);
 
     assert_eq!(a, a);
     assert_ne!(a, c);
@@ -265,16 +266,16 @@ fn vec_mat_mul() {
     use vector::*;
     use matrix::*;
 
-    let a = Vector::from_vec(vec![1, 2, 3, 4]);
-    let b = Vector::from_vec(vec![5, 4, 9]);
-    let m = Matrix::from_vec(vec![
+    let a: Vector<TestType> = Vector::from_vec(vec![1, 2, 3, 4]);
+    let b: Vector<TestType> = Vector::from_vec(vec![5, 4, 9]);
+    let m: Matrix<TestType> = Matrix::from_vec(vec![
         1, 0, 0,
         0, 2, 0,
         0, 0, 3,
         1, 0, 0
     ], 4, 3);
 
-    let p = &a * &m;
+    let p: Vector<TestType> = &a * &m;
     assert_eq!(p, b);
 }
 
@@ -282,18 +283,18 @@ fn vec_mat_mul() {
 fn mat_mat_mul() {
     use matrix::*;
 
-    let a = Matrix::from_vec(vec![
+    let a: Matrix<TestType> = Matrix::from_vec(vec![
         1, 2, 3,
         4, 5, 6,
     ], 2, 3);
 
-    let b = Matrix::from_vec(vec![
+    let b: Matrix<TestType> = Matrix::from_vec(vec![
         7, 8,
         9, 10,
         11, 12
     ], 3, 2);
 
-    let c = Matrix::from_vec(vec![
+    let c: Matrix<TestType> = Matrix::from_vec(vec![
         58, 64,
         139, 154
     ], 2, 2);
@@ -306,9 +307,9 @@ pub fn vec_transpose_mat_mul() {
     use vector::*;
     use matrix::*;
 
-    let a = Vector::from_vec(vec![1, 2, 3, 4]);
-    let b = Vector::from_vec(vec![5, 4, 9]);
-    let m = Matrix::from_vec(vec![
+    let a: Vector<TestType> = Vector::from_vec(vec![1, 2, 3, 4]);
+    let b: Vector<TestType> = Vector::from_vec(vec![5, 4, 9]);
+    let m: Matrix<TestType> = Matrix::from_vec(vec![
         1, 0, 0, 1,
         0, 2, 0, 0,
         0, 0, 3, 0
@@ -323,8 +324,8 @@ pub fn vec_transpose_mat_mul() {
 pub fn vec_add() {
     use vector::*;
 
-    let a = Vector::from_vec(vec![1, 2, 3, 4]);
-    let r = Vector::from_vec(vec![2, 4, 6, 8]);
+    let a: Vector<TestType> = Vector::from_vec(vec![1, 2, 3, 4]);
+    let r: Vector<TestType> = Vector::from_vec(vec![2, 4, 6, 8]);
 
     let s = &a + &a;
 
@@ -335,11 +336,26 @@ pub fn vec_add() {
 pub fn vec_mul_scl() {
     use vector::*;
 
-    let a = Vector::from_vec(vec![1, 2, 3, 4]);
-    let r = Vector::from_vec(vec![2, 4, 6, 8]);
+    let a: Vector<TestType> = Vector::from_vec(vec![1, 2, 3, 4]);
+    let r: Vector<TestType> = Vector::from_vec(vec![2, 4, 6, 8]);
 
 
-    let p = &a * 2;
+    let p: Vector<TestType> = &a * 2;
 
     assert_eq!(r, p);
+}
+
+#[test]
+pub fn save_load() {
+    use vector::*;
+    let path = "vec.tmp";
+
+    let a: Vector<TestType> = Vector::from_vec(vec![0x01_23_45_67, 0x89_AB_CD_EF, 0xFE_DC_BA_98, 0x76_54_32_10]);
+    a.save(path).unwrap();
+
+    let b = unsafe{ Vector::<TestType>::open(path).unwrap() };
+    ::std::fs::remove_file(path).unwrap();
+
+
+    assert_eq!(a, b);
 }
