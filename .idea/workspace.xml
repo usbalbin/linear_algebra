@@ -2,11 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="e9df9a60-8bf9-4b69-9308-34b2d0f65804" name="Default" comment="">
-      <change beforePath="" afterPath="$PROJECT_DIR$/src/util.rs" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/src/tests.rs" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change beforePath="$PROJECT_DIR$/src/lib.rs" afterPath="$PROJECT_DIR$/src/lib.rs" />
-      <change beforePath="$PROJECT_DIR$/src/matrix.rs" afterPath="$PROJECT_DIR$/src/matrix.rs" />
-      <change beforePath="$PROJECT_DIR$/src/vector.rs" afterPath="$PROJECT_DIR$/src/vector.rs" />
     </list>
     <ignored path="$PROJECT_DIR$/target/" />
     <ignored path="$PROJECT_DIR$/out/" />
@@ -22,33 +20,44 @@
       <file leaf-file-name="lib.rs" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/lib.rs">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="136">
-              <caret line="8" column="13" lean-forward="false" selection-start-line="8" selection-start-column="13" selection-end-line="8" selection-end-column="13" />
+            <state relative-caret-position="187">
+              <caret line="11" column="10" lean-forward="false" selection-start-line="11" selection-start-column="10" selection-end-line="11" selection-end-column="10" />
               <folding>
                 <element signature="n#!!doc;n#create_kernel#0" expanded="false" />
                 <element signature="n#!!block;n#create_kernel#0" expanded="false" />
                 <element signature="n#!!block;n#load_extra_src#0" expanded="false" />
+                <element signature="n#!!block;n#init_cl#0" expanded="false" />
                 <element signature="n#!!block;n#setup_queue#0" expanded="false" />
                 <element signature="n#!!block;n#get_src#0" expanded="false" />
                 <element signature="n#!!block;n#get_gpu#0" expanded="false" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="tests.rs" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/tests.rs">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="323">
+              <caret line="89" column="7" lean-forward="true" selection-start-line="89" selection-start-column="7" selection-end-line="89" selection-end-column="7" />
+              <folding>
                 <element signature="n#!!block;n#vec_eq#0" expanded="false" />
                 <element signature="n#!!block;n#vec_mat_mul#0" expanded="false" />
                 <element signature="n#!!block;n#mat_mat_mul#0" expanded="false" />
                 <element signature="n#!!block;n#vec_transpose_mat_mul#0" expanded="false" />
                 <element signature="n#!!block;n#vec_add#0" expanded="false" />
                 <element signature="n#!!block;n#vec_mul_scl#0" expanded="false" />
-                <element signature="n#!!block;n#save_load_vec#0" expanded="false" />
                 <element signature="n#!!block;n#save_load_mat#0" expanded="false" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name=".travis.yml" pinned="false" current-in-tab="false">
+      <file leaf-file-name=".travis.yml" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/.travis.yml">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="51">
-              <caret line="3" column="5" lean-forward="false" selection-start-line="3" selection-start-column="5" selection-end-line="3" selection-end-column="5" />
+            <state relative-caret-position="0">
+              <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="3" selection-end-column="5" />
               <folding />
             </state>
           </provider>
@@ -64,10 +73,10 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="vector.rs" pinned="false" current-in-tab="true">
+      <file leaf-file-name="vector.rs" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/vector.rs">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="170">
+            <state relative-caret-position="-238">
               <caret line="10" column="12" lean-forward="false" selection-start-line="10" selection-start-column="12" selection-end-line="10" selection-end-column="12" />
               <folding>
                 <element signature="e#471#745#0" expanded="false" />
@@ -223,9 +232,10 @@
         <option value="$PROJECT_DIR$/src/traits.rs" />
         <option value="$PROJECT_DIR$/.travis.yml" />
         <option value="$PROJECT_DIR$/src/util.rs" />
-        <option value="$PROJECT_DIR$/src/lib.rs" />
         <option value="$PROJECT_DIR$/src/matrix.rs" />
         <option value="$PROJECT_DIR$/src/vector.rs" />
+        <option value="$PROJECT_DIR$/src/tests.rs" />
+        <option value="$PROJECT_DIR$/src/lib.rs" />
       </list>
     </option>
   </component>
@@ -429,7 +439,7 @@
       <window_info id="Capture Analysis" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.3244963" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.3244963" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Capture Tool" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
@@ -457,17 +467,6 @@
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/src/matrix.rs">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1360">
-          <caret line="90" column="22" lean-forward="false" selection-start-line="90" selection-start-column="22" selection-end-line="90" selection-end-column="22" />
-          <folding>
-            <element signature="e#6308#6309#0" expanded="true" />
-            <element signature="e#6343#6344#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/lib.rs">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
@@ -476,17 +475,10 @@
             <element signature="n#!!doc;n#create_kernel#0" expanded="false" />
             <element signature="n#!!block;n#create_kernel#0" expanded="false" />
             <element signature="n#!!block;n#load_extra_src#0" expanded="false" />
+            <element signature="n#!!block;n#init_cl#0" expanded="false" />
             <element signature="n#!!block;n#setup_queue#0" expanded="false" />
             <element signature="n#!!block;n#get_src#0" expanded="false" />
             <element signature="n#!!block;n#get_gpu#0" expanded="false" />
-            <element signature="n#!!block;n#vec_eq#0" expanded="false" />
-            <element signature="n#!!block;n#vec_mat_mul#0" expanded="false" />
-            <element signature="n#!!block;n#mat_mat_mul#0" expanded="false" />
-            <element signature="n#!!block;n#vec_transpose_mat_mul#0" expanded="false" />
-            <element signature="n#!!block;n#vec_add#0" expanded="false" />
-            <element signature="n#!!block;n#vec_mul_scl#0" expanded="false" />
-            <element signature="n#!!block;n#save_load_vec#0" expanded="false" />
-            <element signature="n#!!block;n#save_load_mat#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -554,17 +546,10 @@
             <element signature="n#!!doc;n#create_kernel#0" expanded="false" />
             <element signature="n#!!block;n#create_kernel#0" expanded="false" />
             <element signature="n#!!block;n#load_extra_src#0" expanded="false" />
+            <element signature="n#!!block;n#init_cl#0" expanded="false" />
             <element signature="n#!!block;n#setup_queue#0" expanded="false" />
             <element signature="n#!!block;n#get_src#0" expanded="false" />
             <element signature="n#!!block;n#get_gpu#0" expanded="false" />
-            <element signature="n#!!block;n#vec_eq#0" expanded="false" />
-            <element signature="n#!!block;n#vec_mat_mul#0" expanded="false" />
-            <element signature="n#!!block;n#mat_mat_mul#0" expanded="false" />
-            <element signature="n#!!block;n#vec_transpose_mat_mul#0" expanded="false" />
-            <element signature="n#!!block;n#vec_add#0" expanded="false" />
-            <element signature="n#!!block;n#vec_mul_scl#0" expanded="false" />
-            <element signature="n#!!block;n#save_load_vec#0" expanded="false" />
-            <element signature="n#!!block;n#save_load_mat#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -632,17 +617,10 @@
             <element signature="n#!!doc;n#create_kernel#0" expanded="false" />
             <element signature="n#!!block;n#create_kernel#0" expanded="false" />
             <element signature="n#!!block;n#load_extra_src#0" expanded="false" />
+            <element signature="n#!!block;n#init_cl#0" expanded="false" />
             <element signature="n#!!block;n#setup_queue#0" expanded="false" />
             <element signature="n#!!block;n#get_src#0" expanded="false" />
             <element signature="n#!!block;n#get_gpu#0" expanded="false" />
-            <element signature="n#!!block;n#vec_eq#0" expanded="false" />
-            <element signature="n#!!block;n#vec_mat_mul#0" expanded="false" />
-            <element signature="n#!!block;n#mat_mat_mul#0" expanded="false" />
-            <element signature="n#!!block;n#vec_transpose_mat_mul#0" expanded="false" />
-            <element signature="n#!!block;n#vec_add#0" expanded="false" />
-            <element signature="n#!!block;n#vec_mul_scl#0" expanded="false" />
-            <element signature="n#!!block;n#save_load_vec#0" expanded="false" />
-            <element signature="n#!!block;n#save_load_mat#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -710,17 +688,10 @@
             <element signature="n#!!doc;n#create_kernel#0" expanded="false" />
             <element signature="n#!!block;n#create_kernel#0" expanded="false" />
             <element signature="n#!!block;n#load_extra_src#0" expanded="false" />
+            <element signature="n#!!block;n#init_cl#0" expanded="false" />
             <element signature="n#!!block;n#setup_queue#0" expanded="false" />
             <element signature="n#!!block;n#get_src#0" expanded="false" />
             <element signature="n#!!block;n#get_gpu#0" expanded="false" />
-            <element signature="n#!!block;n#vec_eq#0" expanded="false" />
-            <element signature="n#!!block;n#vec_mat_mul#0" expanded="false" />
-            <element signature="n#!!block;n#mat_mat_mul#0" expanded="false" />
-            <element signature="n#!!block;n#vec_transpose_mat_mul#0" expanded="false" />
-            <element signature="n#!!block;n#vec_add#0" expanded="false" />
-            <element signature="n#!!block;n#vec_mul_scl#0" expanded="false" />
-            <element signature="n#!!block;n#save_load_vec#0" expanded="false" />
-            <element signature="n#!!block;n#save_load_mat#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -788,17 +759,10 @@
             <element signature="n#!!doc;n#create_kernel#0" expanded="false" />
             <element signature="n#!!block;n#create_kernel#0" expanded="false" />
             <element signature="n#!!block;n#load_extra_src#0" expanded="false" />
+            <element signature="n#!!block;n#init_cl#0" expanded="false" />
             <element signature="n#!!block;n#setup_queue#0" expanded="false" />
             <element signature="n#!!block;n#get_src#0" expanded="false" />
             <element signature="n#!!block;n#get_gpu#0" expanded="false" />
-            <element signature="n#!!block;n#vec_eq#0" expanded="false" />
-            <element signature="n#!!block;n#vec_mat_mul#0" expanded="false" />
-            <element signature="n#!!block;n#mat_mat_mul#0" expanded="false" />
-            <element signature="n#!!block;n#vec_transpose_mat_mul#0" expanded="false" />
-            <element signature="n#!!block;n#vec_add#0" expanded="false" />
-            <element signature="n#!!block;n#vec_mul_scl#0" expanded="false" />
-            <element signature="n#!!block;n#save_load_vec#0" expanded="false" />
-            <element signature="n#!!block;n#save_load_mat#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -866,17 +830,10 @@
             <element signature="n#!!doc;n#create_kernel#0" expanded="false" />
             <element signature="n#!!block;n#create_kernel#0" expanded="false" />
             <element signature="n#!!block;n#load_extra_src#0" expanded="false" />
+            <element signature="n#!!block;n#init_cl#0" expanded="false" />
             <element signature="n#!!block;n#setup_queue#0" expanded="false" />
             <element signature="n#!!block;n#get_src#0" expanded="false" />
             <element signature="n#!!block;n#get_gpu#0" expanded="false" />
-            <element signature="n#!!block;n#vec_eq#0" expanded="false" />
-            <element signature="n#!!block;n#vec_mat_mul#0" expanded="false" />
-            <element signature="n#!!block;n#mat_mat_mul#0" expanded="false" />
-            <element signature="n#!!block;n#vec_transpose_mat_mul#0" expanded="false" />
-            <element signature="n#!!block;n#vec_add#0" expanded="false" />
-            <element signature="n#!!block;n#vec_mul_scl#0" expanded="false" />
-            <element signature="n#!!block;n#save_load_vec#0" expanded="false" />
-            <element signature="n#!!block;n#save_load_mat#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -944,17 +901,10 @@
             <element signature="n#!!doc;n#create_kernel#0" expanded="false" />
             <element signature="n#!!block;n#create_kernel#0" expanded="false" />
             <element signature="n#!!block;n#load_extra_src#0" expanded="false" />
+            <element signature="n#!!block;n#init_cl#0" expanded="false" />
             <element signature="n#!!block;n#setup_queue#0" expanded="false" />
             <element signature="n#!!block;n#get_src#0" expanded="false" />
             <element signature="n#!!block;n#get_gpu#0" expanded="false" />
-            <element signature="n#!!block;n#vec_eq#0" expanded="false" />
-            <element signature="n#!!block;n#vec_mat_mul#0" expanded="false" />
-            <element signature="n#!!block;n#mat_mat_mul#0" expanded="false" />
-            <element signature="n#!!block;n#vec_transpose_mat_mul#0" expanded="false" />
-            <element signature="n#!!block;n#vec_add#0" expanded="false" />
-            <element signature="n#!!block;n#vec_mul_scl#0" expanded="false" />
-            <element signature="n#!!block;n#save_load_vec#0" expanded="false" />
-            <element signature="n#!!block;n#save_load_mat#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -1022,17 +972,10 @@
             <element signature="n#!!doc;n#create_kernel#0" expanded="false" />
             <element signature="n#!!block;n#create_kernel#0" expanded="false" />
             <element signature="n#!!block;n#load_extra_src#0" expanded="false" />
+            <element signature="n#!!block;n#init_cl#0" expanded="false" />
             <element signature="n#!!block;n#setup_queue#0" expanded="false" />
             <element signature="n#!!block;n#get_src#0" expanded="false" />
             <element signature="n#!!block;n#get_gpu#0" expanded="false" />
-            <element signature="n#!!block;n#vec_eq#0" expanded="false" />
-            <element signature="n#!!block;n#vec_mat_mul#0" expanded="false" />
-            <element signature="n#!!block;n#mat_mat_mul#0" expanded="false" />
-            <element signature="n#!!block;n#vec_transpose_mat_mul#0" expanded="false" />
-            <element signature="n#!!block;n#vec_add#0" expanded="false" />
-            <element signature="n#!!block;n#vec_mul_scl#0" expanded="false" />
-            <element signature="n#!!block;n#save_load_vec#0" expanded="false" />
-            <element signature="n#!!block;n#save_load_mat#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -1151,43 +1094,12 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/.travis.yml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="51">
-          <caret line="3" column="5" lean-forward="false" selection-start-line="3" selection-start-column="5" selection-end-line="3" selection-end-column="5" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/util.rs">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="153">
           <caret line="15" column="4" lean-forward="false" selection-start-line="15" selection-start-column="4" selection-end-line="15" selection-end-column="4" />
           <folding>
             <element signature="n#!!block;n#read_u64#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/lib.rs">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="136">
-          <caret line="8" column="13" lean-forward="false" selection-start-line="8" selection-start-column="13" selection-end-line="8" selection-end-column="13" />
-          <folding>
-            <element signature="n#!!doc;n#create_kernel#0" expanded="false" />
-            <element signature="n#!!block;n#create_kernel#0" expanded="false" />
-            <element signature="n#!!block;n#load_extra_src#0" expanded="false" />
-            <element signature="n#!!block;n#setup_queue#0" expanded="false" />
-            <element signature="n#!!block;n#get_src#0" expanded="false" />
-            <element signature="n#!!block;n#get_gpu#0" expanded="false" />
-            <element signature="n#!!block;n#vec_eq#0" expanded="false" />
-            <element signature="n#!!block;n#vec_mat_mul#0" expanded="false" />
-            <element signature="n#!!block;n#mat_mat_mul#0" expanded="false" />
-            <element signature="n#!!block;n#vec_transpose_mat_mul#0" expanded="false" />
-            <element signature="n#!!block;n#vec_add#0" expanded="false" />
-            <element signature="n#!!block;n#vec_mul_scl#0" expanded="false" />
-            <element signature="n#!!block;n#save_load_vec#0" expanded="false" />
-            <element signature="n#!!block;n#save_load_mat#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -1205,7 +1117,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/vector.rs">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="170">
+        <state relative-caret-position="-238">
           <caret line="10" column="12" lean-forward="false" selection-start-line="10" selection-start-column="12" selection-end-line="10" selection-end-column="12" />
           <folding>
             <element signature="e#471#745#0" expanded="false" />
@@ -1236,6 +1148,46 @@
             <element signature="e#14020#14273#0" expanded="false" />
             <element signature="e#14354#14611#0" expanded="false" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/lib.rs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="187">
+          <caret line="11" column="10" lean-forward="false" selection-start-line="11" selection-start-column="10" selection-end-line="11" selection-end-column="10" />
+          <folding>
+            <element signature="n#!!doc;n#create_kernel#0" expanded="false" />
+            <element signature="n#!!block;n#create_kernel#0" expanded="false" />
+            <element signature="n#!!block;n#load_extra_src#0" expanded="false" />
+            <element signature="n#!!block;n#init_cl#0" expanded="false" />
+            <element signature="n#!!block;n#setup_queue#0" expanded="false" />
+            <element signature="n#!!block;n#get_src#0" expanded="false" />
+            <element signature="n#!!block;n#get_gpu#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/tests.rs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="323">
+          <caret line="89" column="7" lean-forward="true" selection-start-line="89" selection-start-column="7" selection-end-line="89" selection-end-column="7" />
+          <folding>
+            <element signature="n#!!block;n#vec_eq#0" expanded="false" />
+            <element signature="n#!!block;n#vec_mat_mul#0" expanded="false" />
+            <element signature="n#!!block;n#mat_mat_mul#0" expanded="false" />
+            <element signature="n#!!block;n#vec_transpose_mat_mul#0" expanded="false" />
+            <element signature="n#!!block;n#vec_add#0" expanded="false" />
+            <element signature="n#!!block;n#vec_mul_scl#0" expanded="false" />
+            <element signature="n#!!block;n#save_load_mat#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/.travis.yml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="3" selection-end-column="5" />
+          <folding />
         </state>
       </provider>
     </entry>
