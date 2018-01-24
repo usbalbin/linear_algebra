@@ -4,10 +4,12 @@ use ocl::ProQue;
 use ocl::Buffer;
 
 pub mod vector;
+pub mod matrix;
 pub mod traits;
+pub mod util;
 
 use traits::Parameter;
-pub mod matrix;
+
 
 struct OclData {
     queue: ocl::ProQue,

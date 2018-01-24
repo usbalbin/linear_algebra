@@ -3,9 +3,8 @@ extern crate ocl;
 
 use cl_data;
 use traits::Parameter;
+use util::*;
 use vector::*;
-use vector::write_u64;
-use vector::read_u64;
 
 pub struct Matrix<T: Parameter> {
     pub(crate) data: Vector<T>,
