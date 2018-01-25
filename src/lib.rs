@@ -295,11 +295,6 @@ fn get_src(types: &Vec<&str>) -> String {
         res += &src.replace("{T}", ty);
         res += &format!("\n#undef IS_{}\n", ty.to_uppercase());
     }
-    use ::std::fs::File;
-    use ::std::io::Write;
-
-    let mut f = File::create("fin.cl").unwrap();
-    f.write_all(res.as_bytes()).unwrap();
 
     res
 }
