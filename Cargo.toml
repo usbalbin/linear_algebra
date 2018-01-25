@@ -1,7 +1,8 @@
 [package]
 name = "linear_algebra"
-version = "0.2.12"
+version = "0.2.13"
 authors = ["usbalbin <albin9604@gmail.com>"]
 
 [dependencies]
 ocl = "0.16.0"
+lazy_static = "1.0.0"

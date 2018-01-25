@@ -1,7 +1,7 @@
 
 extern crate ocl;
 
-use cl_data;
+use get_kernels;
 use traits::Parameter;
 use util::*;
 use vector::*;
@@ -24,8 +24,13 @@ impl<T: Parameter> Matrix<T> {
     }
 
     pub unsafe fn uninitialized(row_count: usize, col_count: usize) -> Matrix<T> {
+        let queue = get_kernels::<T>(T::type_to_str()).queue.clone();
+        Matrix::<T>::uninitialized_lock_free(row_count, col_count, queue)
+    }
+
+    unsafe fn uninitialized_lock_free(row_count: usize, col_count: usize, queue: ocl::Queue) -> Matrix<T> {
         Matrix {
-            data: Vector::uninitialized(row_count * col_count),
+            data: Vector::uninitialized_lock_free(row_count * col_count, queue),
             row_count,
             col_count
         }
@@ -89,12 +94,10 @@ impl<T: Parameter> Matrix<T> {
         let elem_size = read_u64(file)?;
 
 
-        if (elem_size as usize) != ::std::mem::size_of::<T>() {
-            panic!(
-                "Elem size from buffer does not seem to match, what was expected!\
+        assert_eq!(elem_size as usize, ::std::mem::size_of::<T>(),
+                   "Elem size from buffer does not seem to match, what was expected!\
                  Missmatch in endiannes?"
-            );
-        }
+        );
 
         let row_count = read_u64(file)? as usize;
         let col_count = read_u64(file)? as usize;
@@ -235,10 +238,15 @@ pub fn mul_column_row<T: Parameter + ::std::ops::Mul<T, Output=T>>(column: &Vect
 }
 
 fn mul_helper<T: Parameter>(a: &ocl::Buffer<T>, b: &ocl::Buffer<T>, a_row_count: usize, a_col_count: usize, b_col_count: usize) -> Matrix<T> {
+    let mut kernels = get_kernels::<T>(T::type_to_str());
+    let queue = kernels.queue.clone();
+    let kernel = &mut kernels.mul_mat_mat;
 
-    let mut res = unsafe{ Matrix::uninitialized(a_row_count, b_col_count) };
-
-    let kernel = &mut cl_data::<T>().as_mut().unwrap().mul_mat_mat;
+    let mut res = unsafe{ Matrix::uninitialized_lock_free(
+        a_row_count,
+        b_col_count,
+        queue
+    )};
 
     kernel.set_arg_buf_named("C", Some(&mut res.data.data)).unwrap();
     kernel.set_arg_buf_named("A", Some(a)).unwrap();
@@ -265,7 +273,7 @@ impl<'a, 'b, T: Parameter + ::std::ops::Div<T, Output=T>> ::std::ops::Div<T> for
 }
 
 impl<'a, 'b, T> ::std::cmp::PartialEq for Matrix<T>
-    where T: Copy + ::std::cmp::Eq + Parameter
+    where T: Copy + ::std::cmp::PartialEq + Parameter
 {
     fn eq(&self, other: &Matrix<T>) -> bool {
         self.row_count == other.row_count &&

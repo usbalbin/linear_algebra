@@ -3,7 +3,26 @@
 type TestType = u32;
 
 #[test]
+fn f32_vec_mat_mul() {
+    use vector::*;
+    use matrix::*;
+
+    let a: Vector<f32> = Vector::from_vec(vec![1.0, 2.0, 3.0, 4.0]);
+    let b: Vector<f32> = Vector::from_vec(vec![5.0, 4.0, 9.0]);
+    let m: Matrix<f32> = Matrix::from_vec(vec![
+        1.0, 0.0, 0.0,
+        0.0, 2.0, 0.0,
+        0.0, 0.0, 3.0,
+        1.0, 0.0, 0.0
+    ], 4, 3);
+
+    let p: Vector<f32> = &a * &m;
+    assert_eq!(p, b);
+}
+
+#[test]
 fn vec_eq() {
+
     use vector::*;
 
     let a: Vector<TestType> = Vector::from_vec(vec![1, 2, 3, 4]);
@@ -12,9 +31,60 @@ fn vec_eq() {
     let d: Vector<TestType> = Vector::from_vec(vec![1, 2, 3, 4]);
 
     assert_eq!(a, a);
+    assert_eq!(b, b);
+
     assert_ne!(a, c);
+    assert_ne!(c, a);
+
     assert_ne!(a, b);
+    assert_ne!(b, a);
+
     assert_eq!(a, d);
+    assert_eq!(d, a);
+}
+
+#[test]
+fn mat_eq() {
+    use matrix::*;
+
+    let a: Matrix<TestType> = Matrix::from_vec(vec![
+        0x0, 0x1, 0x2,
+        0x3, 0x4, 0x5,
+        0x6, 0x7, 0x8,
+        0x9, 0xA, 0xB
+    ], 4, 3);
+
+    let b: Matrix<TestType> = Matrix::from_vec(vec![
+        0x0, 0x1, 0x2,
+        0x3, 0x4, 0x5,
+        0x6, 0x7, 0x8,
+        0x9, 0xA, 0xC
+    ], 4, 3);
+
+    let c: Matrix<TestType> = Matrix::from_vec(vec![
+        0x0, 0x1, 0x2, 0x3,
+        0x4, 0x5, 0x6, 0x7,
+        0x8, 0x9, 0xA, 0xB
+    ], 3, 4);
+
+    let d: Matrix<TestType> = Matrix::from_vec(vec![
+        0x0, 0x1, 0x2,
+        0x3, 0x4, 0x5,
+        0x6, 0x7, 0x8,
+        0x9, 0xA, 0xB
+    ], 4, 3);
+
+    assert_eq!(a, a);
+    assert_eq!(b, b);
+
+    assert_ne!(a, c);
+    assert_ne!(c, a);
+
+    assert_ne!(a, b);
+    assert_ne!(b, a);
+
+    assert_eq!(a, d);
+    assert_eq!(d, a);
 }
 
 #[test]
@@ -103,7 +173,7 @@ pub fn vec_mul_scl() {
 #[test]
 pub fn save_load_vec() {
     use vector::*;
-    let path = "vec.tmp";
+    let path = "save_load_vec.tmp";
 
     let a: Vector<TestType> = Vector::from_vec(vec![0x01_23_45_67, 0x89_AB_CD_EF, 0xFE_DC_BA_98, 0x76_54_32_10]);
     a.save(path).unwrap();
@@ -118,7 +188,7 @@ pub fn save_load_vec() {
 #[test]
 pub fn save_load_mat() {
     use matrix::*;
-    let path = "vec.tmp";
+    let path = "save_load_mat.tmp";
 
     let a: Matrix<TestType> = Matrix::from_vec(vec![
         0x01_23_45_67, 0x89_AB_CD_EF, 0x13_57_9B_DF,
