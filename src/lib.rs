@@ -121,8 +121,8 @@ fn get_kernels<'a, 'b, T: Parameter>(name: &'b str) -> KernelsGuard<'a, 'b> {
 /// Variable name 'i' is defined as get_global_id(0)
 /// All functions should be prefixed with {T}_, for example {T}_add().
 /// This is because all source will be compiled once for every type in TYPES vector.
-/// 'type' will be defined to the current type and can thus be used in preprocessor
-/// #if conditions and similar to limit what code is compiled.
+/// IS_{T} will be defined to the current type and can thus be used in preprocessor
+/// #ifdef conditions and similar to limit what code is compiled.
 pub fn create_kernel<T: Parameter>(kernel_name: &str) -> ocl::Kernel {
     let queue = &mut cl_data::<T>().queue;
     match queue.create_kernel(kernel_name) {
@@ -285,15 +285,22 @@ fn get_src(types: &Vec<&str>) -> String {
     for ty in types {
         let extra_src = load_extra_src().unwrap_or_default();
 
-        let header = format!("#define type {}\n", ty);
+        let header = format!("#define IS_{}\n", ty.to_uppercase());
         let src = if ty == &"double" {
             "#pragma OPENCL EXTENSION cl_khr_fp64 : enable\n"
         } else {
             ""
         };
-        let src = header + src + include_str!("kernels.cl") + "\n" + &extra_src + "\n#undef type\n";
+        let src = header + src + include_str!("kernels.cl") + "\n" + &extra_src;
         res += &src.replace("{T}", ty);
+        res += &format!("\n#undef IS_{}\n", ty.to_uppercase());
     }
+    use ::std::fs::File;
+    use ::std::io::Write;
+
+    let mut f = File::create("fin.cl").unwrap();
+    f.write_all(res.as_bytes()).unwrap();
+
     res
 }
 
