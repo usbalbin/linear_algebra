@@ -1,6 +1,6 @@
 [package]
 name = "linear_algebra"
-version = "0.2.13"
+version = "0.2.14"
 authors = ["usbalbin <albin9604@gmail.com>"]
 
 [dependencies]

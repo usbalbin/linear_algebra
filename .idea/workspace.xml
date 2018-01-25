@@ -5,11 +5,7 @@
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change beforePath="$PROJECT_DIR$/Cargo.lock" afterPath="$PROJECT_DIR$/Cargo.lock" />
       <change beforePath="$PROJECT_DIR$/Cargo.toml" afterPath="$PROJECT_DIR$/Cargo.toml" />
-      <change beforePath="$PROJECT_DIR$/src/kernels.cl" afterPath="$PROJECT_DIR$/src/kernels.cl" />
       <change beforePath="$PROJECT_DIR$/src/lib.rs" afterPath="$PROJECT_DIR$/src/lib.rs" />
-      <change beforePath="$PROJECT_DIR$/src/matrix.rs" afterPath="$PROJECT_DIR$/src/matrix.rs" />
-      <change beforePath="$PROJECT_DIR$/src/tests.rs" afterPath="$PROJECT_DIR$/src/tests.rs" />
-      <change beforePath="$PROJECT_DIR$/src/vector.rs" afterPath="$PROJECT_DIR$/src/vector.rs" />
     </list>
     <ignored path="$PROJECT_DIR$/target/" />
     <ignored path="$PROJECT_DIR$/out/" />
@@ -22,11 +18,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="lib.rs" pinned="false" current-in-tab="false">
+      <file leaf-file-name="lib.rs" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/lib.rs">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="799">
-              <caret line="128" column="1" lean-forward="true" selection-start-line="128" selection-start-column="1" selection-end-line="128" selection-end-column="1" />
+            <state relative-caret-position="391">
+              <caret line="125" column="20" lean-forward="false" selection-start-line="125" selection-start-column="7" selection-end-line="125" selection-end-column="20" />
               <folding>
                 <element signature="e#1206#1207#0" expanded="true" />
                 <element signature="e#1256#1257#0" expanded="true" />
@@ -38,11 +34,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="tests.rs" pinned="false" current-in-tab="true">
+      <file leaf-file-name="tests.rs" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/tests.rs">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="122">
-              <caret line="22" column="7" lean-forward="true" selection-start-line="22" selection-start-column="7" selection-end-line="22" selection-end-column="7" />
+            <state relative-caret-position="394">
+              <caret line="38" column="21" lean-forward="false" selection-start-line="38" selection-start-column="21" selection-end-line="38" selection-end-column="21" />
               <folding>
                 <element signature="n#!!block;n#vec_mat_mul#0" expanded="false" />
                 <element signature="n#!!block;n#mat_mat_mul#0" expanded="false" />
@@ -145,8 +141,8 @@
       <file leaf-file-name="Cargo.toml" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Cargo.toml">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="119">
-              <caret line="7" column="21" lean-forward="true" selection-start-line="7" selection-start-column="21" selection-end-line="7" selection-end-column="21" />
+            <state relative-caret-position="34">
+              <caret line="2" column="17" lean-forward="false" selection-start-line="2" selection-start-column="17" selection-end-line="2" selection-end-column="17" />
               <folding />
             </state>
           </provider>
@@ -229,11 +225,11 @@
         <option value="$PROJECT_DIR$/.travis.yml" />
         <option value="$PROJECT_DIR$/src/util.rs" />
         <option value="$PROJECT_DIR$/src/kernels.cl" />
-        <option value="$PROJECT_DIR$/Cargo.toml" />
-        <option value="$PROJECT_DIR$/src/lib.rs" />
         <option value="$PROJECT_DIR$/src/vector.rs" />
         <option value="$PROJECT_DIR$/src/matrix.rs" />
         <option value="$PROJECT_DIR$/src/tests.rs" />
+        <option value="$PROJECT_DIR$/src/lib.rs" />
+        <option value="$PROJECT_DIR$/Cargo.toml" />
       </list>
     </option>
   </component>
@@ -929,41 +925,11 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/traits.rs">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="128">
-          <caret line="9" column="17" lean-forward="false" selection-start-line="9" selection-start-column="8" selection-end-line="9" selection-end-column="17" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/kernels.cl">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="204">
           <caret line="12" column="0" lean-forward="false" selection-start-line="12" selection-start-column="0" selection-end-line="12" selection-end-column="0" />
           <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Cargo.toml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="119">
-          <caret line="7" column="21" lean-forward="true" selection-start-line="7" selection-start-column="21" selection-end-line="7" selection-end-column="21" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/lib.rs">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="799">
-          <caret line="128" column="1" lean-forward="true" selection-start-line="128" selection-start-column="1" selection-end-line="128" selection-end-column="1" />
-          <folding>
-            <element signature="e#1206#1207#0" expanded="true" />
-            <element signature="e#1256#1257#0" expanded="true" />
-            <element signature="e#1359#1360#0" expanded="true" />
-            <element signature="e#1413#1414#0" expanded="true" />
-            <element signature="n#!!block;n#load_extra_src#0" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -999,8 +965,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/tests.rs">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="122">
-          <caret line="22" column="7" lean-forward="true" selection-start-line="22" selection-start-column="7" selection-end-line="22" selection-end-column="7" />
+        <state relative-caret-position="394">
+          <caret line="38" column="21" lean-forward="false" selection-start-line="38" selection-start-column="21" selection-end-line="38" selection-end-column="21" />
           <folding>
             <element signature="n#!!block;n#vec_mat_mul#0" expanded="false" />
             <element signature="n#!!block;n#mat_mat_mul#0" expanded="false" />
@@ -1009,6 +975,36 @@
             <element signature="n#!!block;n#vec_mul_scl#0" expanded="false" />
             <element signature="n#!!block;n#save_load_vec#0" expanded="false" />
             <element signature="n#!!block;n#save_load_mat#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/traits.rs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="128">
+          <caret line="9" column="17" lean-forward="false" selection-start-line="9" selection-start-column="8" selection-end-line="9" selection-end-column="17" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Cargo.toml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="34">
+          <caret line="2" column="17" lean-forward="false" selection-start-line="2" selection-start-column="17" selection-end-line="2" selection-end-column="17" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/lib.rs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="391">
+          <caret line="125" column="20" lean-forward="false" selection-start-line="125" selection-start-column="7" selection-end-line="125" selection-end-column="20" />
+          <folding>
+            <element signature="e#1206#1207#0" expanded="true" />
+            <element signature="e#1256#1257#0" expanded="true" />
+            <element signature="e#1359#1360#0" expanded="true" />
+            <element signature="e#1413#1414#0" expanded="true" />
+            <element signature="n#!!block;n#load_extra_src#0" expanded="false" />
           </folding>
         </state>
       </provider>

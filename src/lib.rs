@@ -120,6 +120,9 @@ fn get_kernels<'a, 'b, T: Parameter>(name: &'b str) -> KernelsGuard<'a, 'b> {
 /// In kernel source, use {T} as type when referring to corresponding rust equivalent T.
 /// Variable name 'i' is defined as get_global_id(0)
 /// All functions should be prefixed with {T}_, for example {T}_add().
+/// This is because all source will be compiled once for every type in TYPES vector.
+/// 'type' will be defined to the current type and can thus be used in preprocessor
+/// #if conditions and similar to limit what code is compiled.
 pub fn create_kernel<T: Parameter>(kernel_name: &str) -> ocl::Kernel {
     let queue = &mut cl_data::<T>().queue;
     match queue.create_kernel(kernel_name) {
@@ -281,12 +284,14 @@ fn get_src(types: &Vec<&str>) -> String {
     let mut res = String::new();
     for ty in types {
         let extra_src = load_extra_src().unwrap_or_default();
+
+        let header = format!("#define type {}\n", ty);
         let src = if ty == &"double" {
             "#pragma OPENCL EXTENSION cl_khr_fp64 : enable\n"
         } else {
             ""
-        }.to_owned();
-        let src = src + include_str!("kernels.cl") + "\n" + &extra_src;
+        };
+        let src = header + src + include_str!("kernels.cl") + "\n" + &extra_src + "\n#undef type";
         res += &src.replace("{T}", ty);
     }
     res
