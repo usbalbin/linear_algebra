@@ -291,7 +291,7 @@ fn get_src(types: &Vec<&str>) -> String {
         } else {
             ""
         };
-        let src = header + src + include_str!("kernels.cl") + "\n" + &extra_src + "\n#undef type";
+        let src = header + src + include_str!("kernels.cl") + "\n" + &extra_src + "\n#undef type\n";
         res += &src.replace("{T}", ty);
     }
     res
