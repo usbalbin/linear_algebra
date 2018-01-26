@@ -14,9 +14,6 @@ use KernelsGuard;
 
 use cl_data;
 use get_kernels;
-use GROUP_COUNT;
-use GLOBAL_WORK_SIZE;
-use LOCAL_WORK_SIZE;
 
 pub struct Vector<T>
     where T: Parameter
@@ -225,18 +222,29 @@ impl<T: Parameter> Vector<T> {
 
 impl<T: Parameter + ::std::iter::Sum<T>> Vector<T> {
     pub fn sum(&self) -> T {
-        let mut kernels = get_kernels::<T>(T::type_to_str());
+        let mut data = cl_data::<T>();
+
+        let global_work_size = data.kernel_params.global_work_size;
+        let work_group_size = data.kernel_params.work_group_size;
+        let work_group_count = global_work_size / work_group_size;
+
+        let kernels = data.kernels.get_mut(T::type_to_str()).unwrap();
         let queue = kernels.queue.clone();
+
         let kernel = &mut kernels.sum_vec;
 
         unsafe {
-            let mut tmp = Vector::uninitialized_lock_free(GROUP_COUNT, queue);
+            let mut tmp = Vector::uninitialized_lock_free(work_group_count, queue);
 
             kernel.set_arg_buf_named("data", Some(&self.data)).unwrap();
             kernel.set_arg_buf_named("results", Some(&mut tmp.data)).unwrap();
             kernel.set_arg_scl_named("count", self.len() as i32).unwrap();
 
-            kernel.cmd().gws(GLOBAL_WORK_SIZE).lws(LOCAL_WORK_SIZE).enq().unwrap();
+            kernel.cmd()
+                .gws(global_work_size)
+                .lws(work_group_size)
+                .enq()
+                .unwrap();
             tmp.to_vec().into_iter().sum()
         }
     }
@@ -246,19 +254,30 @@ impl<T: Parameter + ::std::iter::Sum<T>> Vector<T> {
 pub fn dot<T: Parameter + Mul + ::std::iter::Sum<T>>(a: &Vector<T>, b: &Vector<T>) -> T {
     assert_eq!(a.len(), b.len());
 
-    let mut kernels = get_kernels::<T>(T::type_to_str());
+    let mut data = cl_data::<T>();
+
+    let global_work_size = data.kernel_params.global_work_size;
+    let work_group_size = data.kernel_params.work_group_size;
+    let work_group_count = global_work_size / work_group_size;
+
+    let kernels = data.kernels.get_mut(T::type_to_str()).unwrap();
     let queue = kernels.queue.clone();
+
     let kernel = &mut kernels.dot_vec_vec;
 
     unsafe {
-        let mut tmp = Vector::uninitialized_lock_free(GROUP_COUNT, queue);
+        let mut tmp = Vector::uninitialized_lock_free(work_group_count, queue);
 
         kernel.set_arg_buf_named("a", Some(&a.data)).unwrap();
         kernel.set_arg_buf_named("b", Some(&b.data)).unwrap();
         kernel.set_arg_buf_named("results", Some(&mut tmp.data)).unwrap();
         kernel.set_arg_scl_named("count", a.len() as i32).unwrap();
 
-        kernel.cmd().gws(GLOBAL_WORK_SIZE).lws(LOCAL_WORK_SIZE).enq().unwrap();
+        kernel.cmd()
+            .gws(global_work_size)
+            .lws(work_group_size)
+            .enq()
+            .unwrap();
         tmp.to_vec().into_iter().sum()
     }
 }

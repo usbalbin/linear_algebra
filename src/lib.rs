@@ -21,15 +21,15 @@ use std::sync::MutexGuard;
 use std::ops::Deref;
 use std::ops::DerefMut;
 
-/// Good parameters kernel values
-/// TODO: Tune these or query device for optimal values
-const GLOBAL_WORK_SIZE: usize = 2560;
-const LOCAL_WORK_SIZE: usize = 64;
-const GROUP_COUNT: usize = GLOBAL_WORK_SIZE / LOCAL_WORK_SIZE;
-
 struct OclData {
     queue: ocl::ProQue,
+    kernel_params: KernelParams,
     kernels: HashMap<String, Kernels>,
+}
+
+struct KernelParams {
+    work_group_size: usize,
+    global_work_size: usize,
 }
 
 pub struct Kernels {
@@ -94,10 +94,11 @@ lazy_static! {
     {
         let types = &*TYPES.lock().unwrap();
 
-        let queue = unsafe { setup_queue(types) };
+        let (kernel_params, queue) = unsafe { setup_queue(types) };
 
         Mutex::new( OclData {
             queue,
+            kernel_params,
             kernels: HashMap::new(),
         })
     };
@@ -175,6 +176,8 @@ unsafe fn setup_kernels<T: Parameter>(queue: &ProQue) -> Kernels {
         .arg_buf_named::<T, Buffer<T>>("b", None)
         .arg_buf_named::<T, Buffer<T>>("results", None)
         .arg_scl_named::<i32>("count", None);
+
+
 
     let add_assign_vec_vec = queue.create_kernel(&(type_prefix.clone() + "add_assign_vec_vec")).unwrap()
         .arg_buf_named::<T, Buffer<T>>("C", None)
@@ -275,32 +278,39 @@ unsafe fn setup_kernels<T: Parameter>(queue: &ProQue) -> Kernels {
 }
 
 
-unsafe fn setup_queue(types: &Vec<&str>) -> ProQue {
+unsafe fn setup_queue(types: &Vec<&str>) -> (KernelParams, ProQue) {
     let mut builder = ProQue::builder();
-
+    let kernel_params;
     let queue = if let Some((platform, device)) = get_gpu() {
+        kernel_params = KernelParams {
+            work_group_size:  64,
+            global_work_size: 2560,
+        };
         builder
             .platform(platform)
             .device(device)
     } else {
+        kernel_params = KernelParams {
+            work_group_size: 8,
+            global_work_size: 32,
+        };
         builder
             .device(ocl::flags::DEVICE_TYPE_ALL)
     };
 
-    let src = get_src(types);
-    match queue
+    let src = get_src(types, kernel_params.work_group_size);
+    (kernel_params, match queue
         .src(src)
         .build()
         {
             Err(e) => panic!("Failed to compile kernels with error: {}", e),
             Ok(q) => q,
-        }
+        })
 }
 
 
-fn get_src(types: &Vec<&str>) -> String {
-    let mut res = format!("#define lz {}\n", LOCAL_WORK_SIZE);
-
+fn get_src(types: &Vec<&str>, work_group_size: usize) -> String {
+    let mut res = format!("#define lz {}\n", work_group_size);
     for ty in types {
         let extra_src = load_extra_src().unwrap_or_default();
 
