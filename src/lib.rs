@@ -280,32 +280,57 @@ unsafe fn setup_kernels<T: Parameter>(queue: &ProQue) -> Kernels {
 
 unsafe fn setup_queue(types: &Vec<&str>) -> (KernelParams, ProQue) {
     let mut builder = ProQue::builder();
-    let kernel_params;
-    let queue = if let Some((platform, device)) = get_gpu() {
-        kernel_params = KernelParams {
-            work_group_size:  64,
-            global_work_size: 2560,
-        };
-        builder
-            .platform(platform)
-            .device(device)
+    let is_gpu;
+
+
+    let (device, queue) = if let Some((p, d)) = get_gpu() {
+        is_gpu = true;
+
+        (d, builder
+            .platform(p)
+            .device(d)
+        )
     } else {
-        kernel_params = KernelParams {
-            work_group_size: 8,
-            global_work_size: 32,
-        };
-        builder
-            .device(ocl::flags::DEVICE_TYPE_ALL)
+        is_gpu = false;
+        let (p, d) = get_cpu().unwrap();
+        (d, builder
+            .platform(p)
+            .device(d)
+        )
     };
 
+    use ocl::enums::DeviceInfoResult;
+    use ocl::enums::DeviceInfo;
+
+    let wgz = if let
+        DeviceInfoResult::MaxWorkGroupSize(s) =
+            device.info(DeviceInfo::MaxWorkGroupSize)
+        { s } else { 64 };
+
+    let kernel_params = if is_gpu {
+        KernelParams {
+            work_group_size: std::cmp::min(wgz, 64),
+            global_work_size: 2560,
+        }
+    } else {
+        KernelParams {
+            work_group_size: std::cmp::min(wgz, 16),
+            global_work_size: 32,
+        }
+    };
+
+
+
     let src = get_src(types, kernel_params.work_group_size);
-    (kernel_params, match queue
+    let q = match queue
         .src(src)
         .build()
         {
             Err(e) => panic!("Failed to compile kernels with error: {}", e),
             Ok(q) => q,
-        })
+        };
+
+    (kernel_params, q)
 }
 
 
@@ -333,6 +358,21 @@ fn get_gpu() -> Option<(ocl::Platform, ocl::Device)> {
     for platform in platforms {
         let devices =
             match ocl::Device::list(platform, Some(ocl::flags::DEVICE_TYPE_GPU)) {
+                Ok(d) => d,
+                Err(_) => continue,
+            };
+        for d in devices {
+            return Some((platform, d));
+        }
+    }
+    None
+}
+
+fn get_cpu() -> Option<(ocl::Platform, ocl::Device)> {
+    let platforms = ocl::Platform::list();
+    for platform in platforms {
+        let devices =
+            match ocl::Device::list(platform, Some(ocl::flags::DEVICE_TYPE_ALL)) {
                 Ok(d) => d,
                 Err(_) => continue,
             };
