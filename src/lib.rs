@@ -21,6 +21,11 @@ use std::sync::MutexGuard;
 use std::ops::Deref;
 use std::ops::DerefMut;
 
+/// Good parameters kernel values
+/// TODO: Tune these or query device for optimal values
+const GLOBAL_WORK_SIZE: usize = 2560;
+const LOCAL_WORK_SIZE: usize = 64;
+const GROUP_COUNT: usize = GLOBAL_WORK_SIZE / LOCAL_WORK_SIZE;
 
 struct OclData {
     queue: ocl::ProQue,
@@ -32,6 +37,7 @@ pub struct Kernels {
     sub_vec_vec: ocl::Kernel,
     mul_vec_vec: ocl::Kernel,
     div_vec_vec: ocl::Kernel,
+    dot_vec_vec: ocl::Kernel,
 
     add_assign_vec_vec: ocl::Kernel,
     sub_assign_vec_vec: ocl::Kernel,
@@ -45,6 +51,7 @@ pub struct Kernels {
     div_assign_vec_scl: ocl::Kernel,
 
     eq_vec: ocl::Kernel,
+    sum_vec: ocl::Kernel,
 
     //Matrix vec
 
@@ -163,6 +170,11 @@ unsafe fn setup_kernels<T: Parameter>(queue: &ProQue) -> Kernels {
         .arg_buf_named::<T, Buffer<T>>("C", None)
         .arg_buf_named::<T, Buffer<T>>("A", None)
         .arg_buf_named::<T, Buffer<T>>("B", None);
+    let dot_vec_vec = queue.create_kernel(&(type_prefix.clone() + "dot_vec_vec")).unwrap()
+        .arg_buf_named::<T, Buffer<T>>("a", None)
+        .arg_buf_named::<T, Buffer<T>>("b", None)
+        .arg_buf_named::<T, Buffer<T>>("results", None)
+        .arg_scl_named::<i32>("count", None);
 
     let add_assign_vec_vec = queue.create_kernel(&(type_prefix.clone() + "add_assign_vec_vec")).unwrap()
         .arg_buf_named::<T, Buffer<T>>("C", None)
@@ -198,6 +210,12 @@ unsafe fn setup_kernels<T: Parameter>(queue: &ProQue) -> Kernels {
         .arg_buf_named::<T, Buffer<T>>("A", None)
         .arg_buf_named::<T, Buffer<T>>("B", None);
 
+    let sum_vec = queue.create_kernel(&(type_prefix.clone() + "sum_vec")).unwrap()
+        .arg_buf_named::<T, Buffer<T>>("data", None)
+        .arg_buf_named::<T, Buffer<T>>("results", None)
+        .arg_scl_named::<i32>("count", None);
+
+
     //Matrix vec
 
     let mul_vec_mat = queue.create_kernel(&(type_prefix.clone() + "mul_vec_mat")).unwrap()
@@ -213,8 +231,6 @@ unsafe fn setup_kernels<T: Parameter>(queue: &ProQue) -> Kernels {
         .arg_buf_named::<T, Buffer<T>>("B", None)
         .arg_scl_named::<i32>("B_col_count", None)
         .arg_scl_named::<i32>("A_len", None);
-
-
     //Matrix
 
     let mul_mat_mat = queue.create_kernel(&(type_prefix.clone() + "mul_mat_mat")).unwrap()
@@ -229,6 +245,7 @@ unsafe fn setup_kernels<T: Parameter>(queue: &ProQue) -> Kernels {
         sub_vec_vec,
         mul_vec_vec,
         div_vec_vec,
+        dot_vec_vec,
 
         add_assign_vec_vec,
         sub_assign_vec_vec,
@@ -242,6 +259,7 @@ unsafe fn setup_kernels<T: Parameter>(queue: &ProQue) -> Kernels {
         div_assign_vec_scl,
 
         eq_vec,
+        sum_vec,
 
         //Matrix vec
 
@@ -281,7 +299,8 @@ unsafe fn setup_queue(types: &Vec<&str>) -> ProQue {
 
 
 fn get_src(types: &Vec<&str>) -> String {
-    let mut res = String::new();
+    let mut res = format!("#define lz {}\n", LOCAL_WORK_SIZE);
+
     for ty in types {
         let extra_src = load_extra_src().unwrap_or_default();
 

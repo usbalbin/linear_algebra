@@ -44,6 +44,40 @@ fn vec_eq() {
 }
 
 #[test]
+fn vec_sum() {
+    use vector::Vector;
+
+    let rng = 1..971;
+
+    let a: TestType = rng.clone().sum();
+    let b: TestType = Vector::from_vec(rng.collect()).sum();
+
+    assert_eq!(a, b);
+}
+
+#[test]
+fn vec_vec_dot() {
+    use vector::Vector;
+    use vector::dot;
+
+    let rng_a = 1..971;
+    let rng_b = (3..973).rev();
+
+
+    let a: TestType = rng_a.clone()
+        .zip(rng_b.clone())
+        .map(|(a, b)| a * b)
+        .sum();
+
+    let b: TestType = dot(
+        &Vector::from_vec(rng_a.collect()),
+        &Vector::from_vec(rng_b.collect())
+    );
+
+    assert_eq!(a, b);
+}
+
+#[test]
 fn mat_eq() {
     use matrix::*;
 

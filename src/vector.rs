@@ -14,6 +14,9 @@ use KernelsGuard;
 
 use cl_data;
 use get_kernels;
+use GROUP_COUNT;
+use GLOBAL_WORK_SIZE;
+use LOCAL_WORK_SIZE;
 
 pub struct Vector<T>
     where T: Parameter
@@ -71,7 +74,6 @@ impl<T: Parameter> Vector<T> {
         self.data.read(&mut res).enq().unwrap();
         res
     }
-
 
     pub fn generate(kernel: &mut Kernel, size: usize) -> Vector<T> {
         let mut res = unsafe { Vector::uninitialized(size) };
@@ -134,7 +136,6 @@ impl<T: Parameter> Vector<T> {
         &mut self.data
     }
 
-
     pub(crate) unsafe fn read_file_only_data(file: &mut ::std::fs::File, elem_count: u64) -> Result<Vector<T>, ::std::io::Error> {
         use std::io::Read;
 
@@ -170,7 +171,6 @@ impl<T: Parameter> Vector<T> {
             file.write_all(data)
         }
     }
-
 
     /// Append Vector data to file.
     /// NOTE! Vector will be encoded in the current systems endianness
@@ -222,6 +222,47 @@ impl<T: Parameter> Vector<T> {
         Ok(Vector::<T>::read_from_file(&mut file).expect("Failed to read all data from file"))
     }
 }
+
+impl<T: Parameter + ::std::iter::Sum<T>> Vector<T> {
+    pub fn sum(&self) -> T {
+        let mut kernels = get_kernels::<T>(T::type_to_str());
+        let queue = kernels.queue.clone();
+        let kernel = &mut kernels.sum_vec;
+
+        unsafe {
+            let mut tmp = Vector::uninitialized_lock_free(GROUP_COUNT, queue);
+
+            kernel.set_arg_buf_named("data", Some(&self.data)).unwrap();
+            kernel.set_arg_buf_named("results", Some(&mut tmp.data)).unwrap();
+            kernel.set_arg_scl_named("count", self.len() as i32).unwrap();
+
+            kernel.cmd().gws(GLOBAL_WORK_SIZE).lws(LOCAL_WORK_SIZE).enq().unwrap();
+            tmp.to_vec().into_iter().sum()
+        }
+    }
+}
+
+
+pub fn dot<T: Parameter + Mul + ::std::iter::Sum<T>>(a: &Vector<T>, b: &Vector<T>) -> T {
+    assert_eq!(a.len(), b.len());
+
+    let mut kernels = get_kernels::<T>(T::type_to_str());
+    let queue = kernels.queue.clone();
+    let kernel = &mut kernels.dot_vec_vec;
+
+    unsafe {
+        let mut tmp = Vector::uninitialized_lock_free(GROUP_COUNT, queue);
+
+        kernel.set_arg_buf_named("a", Some(&a.data)).unwrap();
+        kernel.set_arg_buf_named("b", Some(&b.data)).unwrap();
+        kernel.set_arg_buf_named("results", Some(&mut tmp.data)).unwrap();
+        kernel.set_arg_scl_named("count", a.len() as i32).unwrap();
+
+        kernel.cmd().gws(GLOBAL_WORK_SIZE).lws(LOCAL_WORK_SIZE).enq().unwrap();
+        tmp.to_vec().into_iter().sum()
+    }
+}
+
 
 impl<'a, 'b, T> ::std::ops::Add<&'b Vector<T>> for &'a Vector<T>
     where T: Copy + ::std::ops::Add<T, Output=T> + Parameter
