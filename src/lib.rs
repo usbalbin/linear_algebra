@@ -29,8 +29,8 @@ struct OclData {
 
 #[derive(Copy, Clone)]
 pub struct KernelParams {
-    work_group_size: usize,
-    global_work_size: usize,
+    pub work_group_size: usize,
+    pub global_work_size: usize,
 }
 
 pub struct Kernels {
