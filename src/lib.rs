@@ -27,7 +27,8 @@ struct OclData {
     kernels: HashMap<String, Kernels>,
 }
 
-struct KernelParams {
+#[derive(Copy, Clone)]
+pub struct KernelParams {
     work_group_size: usize,
     global_work_size: usize,
 }
@@ -89,7 +90,16 @@ lazy_static! {
         "float"
     ]);
 }
-lazy_static! {
+
+/// Get OpenCL queue and kernel parameters(work_group_size and global_work_size)
+pub fn get_cl_data<T: Parameter>() -> (ocl::Queue, KernelParams) {
+    let data = cl_data::<T>();
+    (data.queue.queue().clone(), data.kernel_params)
+}
+
+/// Get all OpenCL data, internal use only
+fn cl_data<'a, T: Parameter>() -> MutexGuard<'a, OclData> {
+    lazy_static! {
     static ref CL_DATA: Mutex<OclData> =
     {
         let types = &*TYPES.lock().unwrap();
@@ -104,7 +114,6 @@ lazy_static! {
     };
 }
 
-fn cl_data<'a, T: Parameter>() -> MutexGuard<'a, OclData> {
     let mut data = CL_DATA.lock().unwrap();
     let ty = T::type_to_str().to_owned();
 
@@ -120,7 +129,6 @@ fn get_kernels<'a, 'b, T: Parameter>(name: &'b str) -> KernelsGuard<'a, 'b> {
     let d = cl_data::<T>();
     KernelsGuard(d, name)
 }
-
 
 /// Create Kernel object from kernel source in extra_kernels.cl
 ///
@@ -277,7 +285,6 @@ unsafe fn setup_kernels<T: Parameter>(queue: &ProQue) -> Kernels {
     }
 }
 
-
 unsafe fn setup_queue(types: &Vec<&str>) -> (KernelParams, ProQue) {
     let mut builder = ProQue::builder();
     let is_gpu;
@@ -332,7 +339,6 @@ unsafe fn setup_queue(types: &Vec<&str>) -> (KernelParams, ProQue) {
 
     (kernel_params, q)
 }
-
 
 fn get_src(types: &Vec<&str>, work_group_size: usize) -> String {
     let mut res = format!("#define lz {}\n", work_group_size);

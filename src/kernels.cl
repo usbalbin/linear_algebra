@@ -79,7 +79,6 @@ kernel void {T}_eq_vec(global uchar* C, global {T}* A, global {T}* B) {
 #define gz get_global_size(0)
 
 /// Calculate the sum of all the elements in the vector
-/// Note: The vector is required to have an element count that is a power of 2
 kernel void {T}_sum_vec(global const {T}* data, global {T}* results, int count) {
 #if __OPENCL_VERSION__ < 200
 		local {T} temp[lz];
@@ -108,8 +107,7 @@ kernel void {T}_sum_vec(global const {T}* data, global {T}* results, int count) 
 #endif
 }
 
-/// Calculate the sum of all the elements in the vector
-/// Note: The vector is required to have an element count that is a power of 2
+/// Calculate the dot product of two vectors
 kernel void {T}_dot_vec_vec(global const {T}* a, global const {T}* b, global {T}* results, int count) {
 #if __OPENCL_VERSION__ < 200
 		local {T} temp[lz];
