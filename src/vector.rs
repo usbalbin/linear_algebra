@@ -218,6 +218,14 @@ impl<T: Parameter> Vector<T> {
 
         Ok(Vector::<T>::read_from_file(&mut file).expect("Failed to read all data from file"))
     }
+
+    pub unsafe fn get_buf(&self) -> &ocl::Buffer<T> {
+        &self.data
+    }
+
+    pub unsafe fn get_buf_mut(&mut self) -> &mut ocl::Buffer<T> {
+        &mut self.data
+    }
 }
 
 impl<T: Parameter + ::std::iter::Sum<T>> Vector<T> {
