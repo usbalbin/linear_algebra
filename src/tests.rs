@@ -242,8 +242,7 @@ pub fn normalize_vec() {
 
     let v: Vec<f32> = (1..100).map(|x| x as f32).collect();
     let a = Vector::from_vec(v.clone()).normalized();
-    let mut b = Vector::from_vec(v);
-    b.normalize();
+    let b = Vector::from_vec(v).normalize();
 
     assert!(are_close(a.length(), 1.0, 0.01), "a.length(): {}", a.length());
     assert!(are_close(b.length(), 1.0, 0.01), "b.length(): {}", b.length());

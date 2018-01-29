@@ -282,13 +282,14 @@ impl<T> Vector<T>
     Parameter + Real + Copy + Mul<T, Output=T> + MulAssign<T> + Div<T, Output=T> + ::std::iter::Sum<T>
 {
     /// Turn self into normalized version of itself
-    pub fn normalize(&mut self) {
+    pub fn normalize(mut self) -> Self {
         let inv_length = T::one() / self.length();
-        *self *= inv_length;
+        self *= inv_length;
+        self
     }
 
     /// Return normalized version of self
-    pub fn normalized(&self) -> Vector<T> {
+    pub fn normalized(&self) -> Self {
         let inv_length = T::one() / self.length();
         self * inv_length
     }
