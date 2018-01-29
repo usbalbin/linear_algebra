@@ -242,6 +242,11 @@ impl<T: Parameter + ::std::iter::Sum<T>> Vector<T> {
         let work_group_size = data.kernel_params.work_group_size;
         let work_group_count = global_work_size / work_group_size;
 
+
+        if self.len() <= work_group_count { // No need to reduce?
+            return self.to_vec().into_iter().sum()
+        }
+
         let kernels = data.kernels.get_mut(T::type_to_str()).unwrap();
         let queue = kernels.queue.clone();
 
@@ -266,7 +271,7 @@ impl<T: Parameter + ::std::iter::Sum<T>> Vector<T> {
 
 impl<T> Vector<T>
     where T:
-        Parameter + Real + ::std::iter::Sum<T>
+        Parameter + Real + ::std::iter::Sum<T> + Mul<T, Output=T> + MulAssign<T>
 {
 
     /// Calculate length of vector eg. sqrt(x1^2+x2^2+...)
@@ -295,7 +300,7 @@ impl<T> Vector<T>
     }
 }
 
-pub fn dot<T: Parameter + Mul + ::std::iter::Sum<T>>(a: &Vector<T>, b: &Vector<T>) -> T {
+pub fn dot<T: Parameter + Mul<T, Output=T> + ::std::iter::Sum<T>>(a: &Vector<T>, b: &Vector<T>) -> T {
     assert_eq!(a.len(), b.len());
 
     let mut data = cl_data::<T>();
@@ -303,6 +308,12 @@ pub fn dot<T: Parameter + Mul + ::std::iter::Sum<T>>(a: &Vector<T>, b: &Vector<T
     let global_work_size = data.kernel_params.global_work_size;
     let work_group_size = data.kernel_params.work_group_size;
     let work_group_count = global_work_size / work_group_size;
+
+
+    if a.len() <= work_group_count { // No need to reduce?
+        return a.to_vec().iter().zip(b.to_vec().iter()).map(|(a, b)| *a * *b).sum()
+    }
+
 
     let kernels = data.kernels.get_mut(T::type_to_str()).unwrap();
     let queue = kernels.queue.clone();

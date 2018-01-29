@@ -46,13 +46,14 @@ fn vec_eq() {
 #[test]
 fn vec_sum() {
     use vector::Vector;
+    for size in &[1, 2, 8, 16, 64, 128, 971] {
+        let rng = 0..*size;
 
-    let rng = 1..971;
+        let a: TestType = rng.clone().sum();
+        let b: TestType = Vector::from_vec(rng.collect()).sum();
 
-    let a: TestType = rng.clone().sum();
-    let b: TestType = Vector::from_vec(rng.collect()).sum();
-
-    assert_eq!(a, b);
+        assert_eq!(a, b);
+    }
 }
 
 #[test]
@@ -163,7 +164,7 @@ fn mat_mat_mul() {
 }
 
 #[test]
-pub fn vec_transpose_mat_mul() {
+fn vec_transpose_mat_mul() {
     use vector::*;
     use matrix::*;
 
@@ -180,7 +181,7 @@ pub fn vec_transpose_mat_mul() {
 }
 
 #[test]
-pub fn vec_add() {
+fn vec_add() {
     use vector::*;
 
     let a: Vector<TestType> = Vector::from_vec(vec![1, 2, 3, 4]);
@@ -192,7 +193,7 @@ pub fn vec_add() {
 }
 
 #[test]
-pub fn vec_mul_scl() {
+fn vec_mul_scl() {
     use vector::*;
 
     let a: Vector<TestType> = Vector::from_vec(vec![1, 2, 3, 4]);
@@ -205,7 +206,7 @@ pub fn vec_mul_scl() {
 }
 
 #[test]
-pub fn save_load_vec() {
+fn save_load_vec() {
     use vector::*;
     let path = "save_load_vec.tmp";
 
@@ -220,7 +221,7 @@ pub fn save_load_vec() {
 }
 
 #[test]
-pub fn save_load_mat() {
+fn save_load_mat() {
     use matrix::*;
     let path = "save_load_mat.tmp";
 
@@ -237,32 +238,36 @@ pub fn save_load_mat() {
 }
 
 #[test]
-pub fn normalize_vec() {
+fn normalize_vec() {
     use vector::*;
 
-    let v: Vec<f32> = (1..100).map(|x| x as f32).collect();
-    let a = Vector::from_vec(v.clone()).normalized();
-    let b = Vector::from_vec(v).normalize();
+    for size in &[1, 2, 8, 16, 64, 128] {
+        let v: Vec<f32> = (1..(*size + 1)).map(|x| x as f32).collect();
+        let a = Vector::from_vec(v.clone()).normalized();
+        let b = Vector::from_vec(v).normalize();
 
-    assert!(are_close(a.length(), 1.0, 0.01), "a.length(): {}", a.length());
-    assert!(are_close(b.length(), 1.0, 0.01), "b.length(): {}", b.length());
+        assert!(are_close(a.length(), 1.0, 0.01), "a.length(): {}", a.length());
+        assert!(are_close(b.length(), 1.0, 0.01), "b.length(): {}", b.length());
+    }
 }
 
 #[test]
-pub fn length_vec() {
+fn length_vec() {
     use vector::*;
 
-    let a = (1..100).map(|x: i32| x as f32).collect();
-    let b = (1..100).map(|x: i32| x as f32);
+    for size in &[1, 2, 8, 16, 64, 128] {
+        let a = (0..*size).map(|x: i32| x as f32).collect();
+        let b = (0..*size).map(|x: i32| x as f32);
 
-    let a  = Vector::from_vec(a);
-    let b = b.map(|x| x * x);
+        let a = Vector::from_vec(a);
+        let b = b.map(|x| x * x);
 
-    let a: f32 = a.length();
-    let b: f32 = b.sum();
-    let b: f32 = b.sqrt();
+        let a: f32 = a.length();
+        let b: f32 = b.sum();
+        let b: f32 = b.sqrt();
 
-    assert!(are_close(a, b, 0.0001), "a: {}, b: {}", a, b);
+        assert!(are_close(a, b, 0.0001), "a: {}, b: {}", a, b);
+    }
 }
 
 #[test]
