@@ -265,6 +265,19 @@ pub fn length_vec() {
     assert!(are_close(a, b, 0.0001), "a: {}, b: {}", a, b);
 }
 
+#[test]
+fn vec_clone() {
+
+    use vector::*;
+
+    let a: Vector<TestType> = Vector::from_vec(vec![1, 2, 3, 4]);
+    let b: Vector<TestType> = Vector::from_vec(vec![1, 2, 3, 5]);
+    let c = a.clone();
+
+    assert_eq!(a, c);
+    assert_ne!(a, b);
+}
+
 
 use ::traits::Real;
 use ::std::ops::{ Sub, Neg };

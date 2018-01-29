@@ -45,11 +45,13 @@
       <file leaf-file-name="tests.rs" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/tests.rs">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="213">
-              <caret line="244" column="8" lean-forward="false" selection-start-line="244" selection-start-column="8" selection-end-line="244" selection-end-column="8" />
+            <state relative-caret-position="114">
+              <caret line="265" column="1" lean-forward="true" selection-start-line="265" selection-start-column="1" selection-end-line="265" selection-end-column="1" />
               <folding>
                 <element signature="n#!!block;n#f32_vec_mat_mul#0" expanded="false" />
                 <element signature="n#!!block;n#vec_eq#0" expanded="false" />
+                <element signature="n#!!block;n#vec_sum#0" expanded="false" />
+                <element signature="n#!!block;n#vec_vec_dot#0" expanded="false" />
                 <element signature="n#!!block;n#mat_eq#0" expanded="false" />
                 <element signature="n#!!block;n#vec_mat_mul#0" expanded="false" />
                 <element signature="n#!!block;n#mat_mat_mul#0" expanded="false" />
@@ -58,8 +60,9 @@
                 <element signature="n#!!block;n#vec_mul_scl#0" expanded="false" />
                 <element signature="n#!!block;n#save_load_vec#0" expanded="false" />
                 <element signature="n#!!block;n#save_load_mat#0" expanded="false" />
-                <element signature="e#5860#5861#0" expanded="true" />
-                <element signature="e#5901#5902#0" expanded="true" />
+                <element signature="n#!!block;n#normalize_vec#0" expanded="false" />
+                <element signature="n#!!block;n#length_vec#0" expanded="false" />
+                <element signature="n#!!block;n#are_close#0" expanded="false" />
               </folding>
             </state>
           </provider>
@@ -78,8 +81,8 @@
       <file leaf-file-name="vector.rs" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/vector.rs">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="306">
-              <caret line="290" column="7" lean-forward="true" selection-start-line="290" selection-start-column="7" selection-end-line="290" selection-end-column="7" />
+            <state relative-caret-position="510">
+              <caret line="647" column="1" lean-forward="true" selection-start-line="647" selection-start-column="1" selection-end-line="647" selection-end-column="1" />
               <folding>
                 <element signature="e#454#455#0" expanded="true" />
                 <element signature="e#510#511#0" expanded="true" />
@@ -230,8 +233,8 @@
         <option value="$PROJECT_DIR$/src/lib.rs" />
         <option value="$PROJECT_DIR$/src/kernels.cl" />
         <option value="$PROJECT_DIR$/src/traits.rs" />
-        <option value="$PROJECT_DIR$/src/vector.rs" />
         <option value="$PROJECT_DIR$/src/tests.rs" />
+        <option value="$PROJECT_DIR$/src/vector.rs" />
       </list>
     </option>
   </component>
@@ -1142,11 +1145,13 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/tests.rs">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="213">
-          <caret line="244" column="8" lean-forward="false" selection-start-line="244" selection-start-column="8" selection-end-line="244" selection-end-column="8" />
+        <state relative-caret-position="114">
+          <caret line="265" column="1" lean-forward="true" selection-start-line="265" selection-start-column="1" selection-end-line="265" selection-end-column="1" />
           <folding>
             <element signature="n#!!block;n#f32_vec_mat_mul#0" expanded="false" />
             <element signature="n#!!block;n#vec_eq#0" expanded="false" />
+            <element signature="n#!!block;n#vec_sum#0" expanded="false" />
+            <element signature="n#!!block;n#vec_vec_dot#0" expanded="false" />
             <element signature="n#!!block;n#mat_eq#0" expanded="false" />
             <element signature="n#!!block;n#vec_mat_mul#0" expanded="false" />
             <element signature="n#!!block;n#mat_mat_mul#0" expanded="false" />
@@ -1155,16 +1160,17 @@
             <element signature="n#!!block;n#vec_mul_scl#0" expanded="false" />
             <element signature="n#!!block;n#save_load_vec#0" expanded="false" />
             <element signature="n#!!block;n#save_load_mat#0" expanded="false" />
-            <element signature="e#5860#5861#0" expanded="true" />
-            <element signature="e#5901#5902#0" expanded="true" />
+            <element signature="n#!!block;n#normalize_vec#0" expanded="false" />
+            <element signature="n#!!block;n#length_vec#0" expanded="false" />
+            <element signature="n#!!block;n#are_close#0" expanded="false" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/vector.rs">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="306">
-          <caret line="290" column="7" lean-forward="true" selection-start-line="290" selection-start-column="7" selection-end-line="290" selection-end-column="7" />
+        <state relative-caret-position="510">
+          <caret line="647" column="1" lean-forward="true" selection-start-line="647" selection-start-column="1" selection-end-line="647" selection-end-column="1" />
           <folding>
             <element signature="e#454#455#0" expanded="true" />
             <element signature="e#510#511#0" expanded="true" />

@@ -636,3 +636,13 @@ impl<T: Parameter + ::std::fmt::Debug + Clone> ::std::fmt::Debug for Vector<T> {
         write!(f, " }}")
     }
 }
+
+impl<T: Parameter> Clone for Vector<T> {
+    fn clone(&self) -> Self {
+        unsafe {
+            let mut result = Self::uninitialized(self.len());
+            self.data.copy(&mut result.data, None, None).enq().unwrap();
+            result
+        }
+    }
+}
