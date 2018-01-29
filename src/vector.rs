@@ -5,9 +5,14 @@ use ocl::{Buffer, MemFlags, Kernel};
 
 use matrix::Matrix;
 
-use ::std::ops::{Add, Mul};
+use ::std::ops::{
+    Add, AddAssign,
+    Sub, SubAssign,
+    Mul, MulAssign,
+    Div, DivAssign
+};
 
-use traits::Parameter;
+use traits::*;
 use util::*;
 
 use KernelsGuard;
@@ -229,6 +234,7 @@ impl<T: Parameter> Vector<T> {
 }
 
 impl<T: Parameter + ::std::iter::Sum<T>> Vector<T> {
+    /// Calculate the sum of every element in the vector
     pub fn sum(&self) -> T {
         let mut data = cl_data::<T>();
 
@@ -258,6 +264,35 @@ impl<T: Parameter + ::std::iter::Sum<T>> Vector<T> {
     }
 }
 
+impl<T> Vector<T>
+    where T:
+        Parameter + Real + ::std::iter::Sum<T>
+{
+
+    /// Calculate length of vector eg. sqrt(x1^2+x2^2+...)
+    ///
+    /// Note!!! This is not the same as len() which returns the number of elements
+    pub fn length(&self) -> T {
+        dot(self, self).sqrt()//TODO
+    }
+}
+
+impl<T> Vector<T>
+    where T:
+    Parameter + Real + Copy + Mul<T, Output=T> + MulAssign<T> + Div<T, Output=T> + ::std::iter::Sum<T>
+{
+    /// Turn self into normalized version of itself
+    pub fn normalize(&mut self) {
+        let inv_length = T::one() / self.length();
+        *self *= inv_length;
+    }
+
+    /// Return normalized version of self
+    pub fn normalized(&self) -> Vector<T> {
+        let inv_length = T::one() / self.length();
+        self * inv_length
+    }
+}
 
 pub fn dot<T: Parameter + Mul + ::std::iter::Sum<T>>(a: &Vector<T>, b: &Vector<T>) -> T {
     assert_eq!(a.len(), b.len());
@@ -291,8 +326,8 @@ pub fn dot<T: Parameter + Mul + ::std::iter::Sum<T>>(a: &Vector<T>, b: &Vector<T
 }
 
 
-impl<'a, 'b, T> ::std::ops::Add<&'b Vector<T>> for &'a Vector<T>
-    where T: Copy + ::std::ops::Add<T, Output=T> + Parameter
+impl<'a, 'b, T> Add<&'b Vector<T>> for &'a Vector<T>
+    where T: Copy + Add<T, Output=T> + Parameter
 {
     type Output = Vector<T>;
     fn add(self, other: &'b Vector<T>) -> Vector<T> {
@@ -306,8 +341,8 @@ impl<'a, 'b, T> ::std::ops::Add<&'b Vector<T>> for &'a Vector<T>
     }
 }
 
-impl<'a, T> ::std::ops::AddAssign<&'a Vector<T>> for Vector<T>
-    where T: Copy + ::std::ops::AddAssign<T> + Parameter
+impl<'a, T> AddAssign<&'a Vector<T>> for Vector<T>
+    where T: Copy + AddAssign<T> + Parameter
 {
     fn add_assign(&mut self, other: &'a Vector<T>) {
         let mut kernels = get_kernels::<T>(T::type_to_str());
@@ -318,8 +353,8 @@ impl<'a, T> ::std::ops::AddAssign<&'a Vector<T>> for Vector<T>
     }
 }
 
-impl<'a, T> ::std::ops::Add<&'a Vector<T>> for Vector<T>
-    where T: Copy + ::std::ops::AddAssign<T> + Parameter
+impl<'a, T> Add<&'a Vector<T>> for Vector<T>
+    where T: Copy + AddAssign<T> + Parameter
 {
     type Output = Vector<T>;
     fn add(mut self, other: &'a Vector<T>) -> Vector<T> {
@@ -328,8 +363,8 @@ impl<'a, T> ::std::ops::Add<&'a Vector<T>> for Vector<T>
     }
 }
 
-impl<'a, 'b, T> ::std::ops::Sub<&'b Vector<T>> for &'a Vector<T>
-    where T: Copy + ::std::ops::Sub<T, Output=T> + Parameter
+impl<'a, 'b, T> Sub<&'b Vector<T>> for &'a Vector<T>
+    where T: Copy + Sub<T, Output=T> + Parameter
 {
     type Output = Vector<T>;
     fn sub(self, other: &'b Vector<T>) -> Vector<T> {
@@ -343,8 +378,8 @@ impl<'a, 'b, T> ::std::ops::Sub<&'b Vector<T>> for &'a Vector<T>
     }
 }
 
-impl<'a, T> ::std::ops::SubAssign<&'a Vector<T>> for Vector<T>
-    where T: Copy + ::std::ops::SubAssign<T> + Parameter
+impl<'a, T> SubAssign<&'a Vector<T>> for Vector<T>
+    where T: Copy + SubAssign<T> + Parameter
 {
     fn sub_assign(&mut self, other: &'a Vector<T>) {
         let mut kernels = get_kernels::<T>(T::type_to_str());
@@ -355,8 +390,8 @@ impl<'a, T> ::std::ops::SubAssign<&'a Vector<T>> for Vector<T>
 }
 
 //Mul by scalar
-impl<'a, 'b, T> ::std::ops::Mul<T> for &'a Vector<T>
-    where T: Copy + ::std::ops::Mul<T, Output=T> + Parameter
+impl<'a, 'b, T> Mul<T> for &'a Vector<T>
+    where T: Copy + Mul<T, Output=T> + Parameter
 {
     type Output = Vector<T>;
     fn mul(self, scalar: T) -> Vector<T> {
@@ -380,8 +415,8 @@ impl<'a, 'b, T> ::std::ops::Mul<T> for &'a Vector<T>
     }
 }
 
-impl<T> ::std::ops::MulAssign<T> for Vector<T>
-    where T: Copy + ::std::ops::MulAssign<T> + Parameter
+impl<T> MulAssign<T> for Vector<T>
+    where T: Copy + MulAssign<T> + Parameter
 {
     fn mul_assign(&mut self, scalar: T) {
         let mut kernels = get_kernels::<T>(T::type_to_str());
@@ -394,8 +429,8 @@ impl<T> ::std::ops::MulAssign<T> for Vector<T>
     }
 }
 
-impl<T> ::std::ops::Mul<T> for Vector<T>
-    where T: Copy + ::std::ops::MulAssign<T> + Parameter
+impl<T> Mul<T> for Vector<T>
+    where T: Copy + MulAssign<T> + Parameter
 {
     type Output = Vector<T>;
     fn mul(mut self, scalar: T) -> Vector<T> {
@@ -404,8 +439,8 @@ impl<T> ::std::ops::Mul<T> for Vector<T>
     }
 }
 
-impl<'a, 'b, T> ::std::ops::Mul<&'b Vector<T>> for &'a Vector<T>
-    where T: Copy + ::std::ops::Mul<T, Output=T> + Parameter
+impl<'a, 'b, T> Mul<&'b Vector<T>> for &'a Vector<T>
+    where T: Copy + Mul<T, Output=T> + Parameter
 {
     type Output = Vector<T>;
     fn mul(self, other: &'b Vector<T>) -> Vector<T> {
@@ -420,8 +455,8 @@ impl<'a, 'b, T> ::std::ops::Mul<&'b Vector<T>> for &'a Vector<T>
     }
 }
 
-impl<'a, T> ::std::ops::MulAssign<&'a Vector<T>> for Vector<T>
-    where T: Copy + ::std::ops::MulAssign<T> + Parameter
+impl<'a, T> MulAssign<&'a Vector<T>> for Vector<T>
+    where T: Copy + MulAssign<T> + Parameter
 {
     fn mul_assign(&mut self, other: &'a Vector<T>) {
         let mut kernels = get_kernels::<T>(T::type_to_str());
@@ -430,7 +465,7 @@ impl<'a, T> ::std::ops::MulAssign<&'a Vector<T>> for Vector<T>
 }
 
 //Vector * Matrix
-impl<'a, 'b, T> ::std::ops::Mul<&'b Matrix<T>> for &'a Vector<T>
+impl<'a, 'b, T> Mul<&'b Matrix<T>> for &'a Vector<T>
     where T: Copy + Mul<T, Output=T> + Add + Parameter
 {
     type Output = Vector<T>;
@@ -484,8 +519,8 @@ pub fn mul_transpose_mat<T>(vector: &Vector<T>, other_m: &Matrix<T>) -> Vector<T
     res
 }
 
-impl<'a, 'b, T> ::std::ops::Div<&'b Vector<T>> for &'a Vector<T>
-    where T: Copy + ::std::ops::Div<T, Output=T> + Parameter
+impl<'a, 'b, T> Div<&'b Vector<T>> for &'a Vector<T>
+    where T: Copy + Div<T, Output=T> + Parameter
 {
     type Output = Vector<T>;
     fn div(self, other: &'b Vector<T>) -> Vector<T> {
@@ -501,8 +536,8 @@ impl<'a, 'b, T> ::std::ops::Div<&'b Vector<T>> for &'a Vector<T>
     }
 }
 
-impl<'a, T> ::std::ops::DivAssign<&'a Vector<T>> for Vector<T>
-    where T: Copy + ::std::ops::DivAssign<T> + Parameter
+impl<'a, T> DivAssign<&'a Vector<T>> for Vector<T>
+    where T: Copy + DivAssign<T> + Parameter
 {
     fn div_assign(&mut self, other: &'a Vector<T>) {
         let mut kernels = get_kernels::<T>(T::type_to_str());
@@ -511,8 +546,8 @@ impl<'a, T> ::std::ops::DivAssign<&'a Vector<T>> for Vector<T>
 }
 
 //Div by scalar
-impl<'a, 'b, T> ::std::ops::Div<T> for &'a Vector<T>
-    where T: Copy + ::std::ops::Div<T, Output=T> + Parameter
+impl<'a, T> Div<T> for &'a Vector<T>
+    where T: Parameter + Copy + Div<T, Output=T>
 {
     type Output = Vector<T>;
     fn div(self, scalar: T) -> Vector<T> {
@@ -536,8 +571,8 @@ impl<'a, 'b, T> ::std::ops::Div<T> for &'a Vector<T>
     }
 }
 
-impl<T> ::std::ops::DivAssign<T> for Vector<T>
-    where T: Copy + ::std::ops::DivAssign<T> + Parameter
+impl<T> DivAssign<T> for Vector<T>
+    where T: Copy + DivAssign<T> + Parameter
 {
     fn div_assign(&mut self, scalar: T) {
         let mut kernels = get_kernels::<T>(T::type_to_str());

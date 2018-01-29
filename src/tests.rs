@@ -235,3 +235,51 @@ pub fn save_load_mat() {
 
     assert_eq!(a, b);
 }
+
+#[test]
+pub fn normalize_vec() {
+    use vector::*;
+
+    let v: Vec<f32> = (1..100).map(|x| x as f32).collect();
+    let a = Vector::from_vec(v.clone()).normalized();
+    let mut b = Vector::from_vec(v);
+    b.normalize();
+
+    assert!(are_close(a.length(), 1.0, 0.01), "a.length(): {}", a.length());
+    assert!(are_close(b.length(), 1.0, 0.01), "b.length(): {}", b.length());
+}
+
+#[test]
+pub fn length_vec() {
+    use vector::*;
+
+    let a = (1..100).map(|x: i32| x as f32).collect();
+    let b = (1..100).map(|x: i32| x as f32);
+
+    let a  = Vector::from_vec(a);
+    let b = b.map(|x| x * x);
+
+    let a: f32 = a.length();
+    let b: f32 = b.sum();
+    let b: f32 = b.sqrt();
+
+    assert!(are_close(a, b, 0.0001), "a: {}, b: {}", a, b);
+}
+
+
+use ::traits::Real;
+use ::std::ops::{ Sub, Neg };
+use ::std::cmp::PartialOrd;
+
+fn are_close<T: PartialOrd + Real>(a: T, b: T, delta: T) -> bool
+    where T: Sub<T, Output=T> + Neg<Output=T> + PartialOrd
+{
+    let d = abs(a - b);
+    d < delta
+}
+
+fn abs<T: Real + PartialOrd>(x: T) -> T
+    where T: Neg<Output=T>
+{
+    if x < T::zero() { -x } else { x }
+}

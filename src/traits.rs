@@ -1,11 +1,32 @@
 
 extern crate ocl;
 
+use ::std::ops::{
+    Add, AddAssign,
+    Sub, SubAssign,
+    Mul, MulAssign,
+    Div, DivAssign,
+    Neg
+};
+
+
 pub trait Parameter: ocl::OclPrm {
     fn type_to_str() -> &'static str;
 }
 
-// Implements an unsafe trait for a list of types.
+
+pub trait Real: Parameter +
+    Add + AddAssign +
+    Sub + SubAssign +
+    Mul + MulAssign +
+    Div + DivAssign +
+    Neg
+{
+    fn sqrt(self) -> Self;
+    fn one() -> Self;
+    fn zero() -> Self;
+}
+
 macro_rules! impl_type_to_str {
     ($( $ty:ident ),+) => {
         $( impl Parameter for $ty {
@@ -35,4 +56,23 @@ macro_rules! impl_type_to_str {
     }
 }
 
+macro_rules! impl_sqrt {
+    ($( $ty:ident ),+) => {
+        $( impl Real for $ty {
+            #[allow(unconditional_recursion)]
+            fn sqrt(self) -> Self {
+                self.sqrt()
+            }
+            fn one() -> Self {
+                1.0 as $ty
+            }
+            fn zero() -> Self {
+                0.0 as $ty
+            }
+        } )+
+    }
+}
+
 impl_type_to_str!(u8, i8, u16, i16, u32, i32, u64, i64, usize, isize, f32, f64);
+
+impl_sqrt!(f32, f64);
