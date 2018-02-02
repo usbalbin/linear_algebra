@@ -23,13 +23,13 @@ use std::ops::DerefMut;
 
 struct OclData {
     queue: ocl::ProQue,
-    kernel_params: KernelParams,
-    kernels: HashMap<String, Kernels>,
+    kernels: HashMap<String, Kernels>
 }
 
 #[derive(Copy, Clone)]
 pub struct KernelParams {
     pub work_group_size: usize,
+    pub work_group_count: usize,
     pub global_work_size: usize,
 }
 
@@ -92,9 +92,33 @@ lazy_static! {
 }
 
 /// Get OpenCL queue and kernel parameters(work_group_size and global_work_size)
-pub fn get_cl_data<T: Parameter>() -> (ocl::Queue, KernelParams) {
+pub fn get_cl_data<T: Parameter>() -> ocl::Queue {
     let data = cl_data::<T>();
-    (data.queue.queue().clone(), data.kernel_params)
+    data.queue.queue().clone()
+}
+
+/// Get optimal work sizes for kernel
+fn get_work_sizes(kernel: &ocl::Kernel) -> KernelParams {
+    use ocl::enums::{ KernelWorkGroupInfoResult, KernelWorkGroupInfo };
+
+    let result = kernel.wg_info(
+        ocl::Device::from(kernel.devices().unwrap()[0]),
+        KernelWorkGroupInfo::PreferredWorkGroupSizeMultiple);
+
+    let work_group_size =
+        match result {
+            KernelWorkGroupInfoResult::PreferredWorkGroupSizeMultiple(s) => s,
+            KernelWorkGroupInfoResult::Error(e) => panic!("{}", e),
+            _ => panic!(""),
+        };
+    let work_group_count = 64;                  //TODO: find a way to decide this automatically
+    let global_work_size = work_group_count * work_group_size;
+
+    KernelParams{
+        work_group_size,
+        work_group_count,
+        global_work_size
+    }
 }
 
 /// Get all OpenCL data, internal use only
@@ -104,11 +128,10 @@ fn cl_data<'a, T: Parameter>() -> MutexGuard<'a, OclData> {
     {
         let types = &*TYPES.lock().unwrap();
 
-        let (kernel_params, queue) = unsafe { setup_queue(types) };
+        let queue = unsafe { setup_queue(types) };
 
         Mutex::new( OclData {
             queue,
-            kernel_params,
             kernels: HashMap::new(),
         })
     };
@@ -184,7 +207,6 @@ unsafe fn setup_kernels<T: Parameter>(queue: &ProQue) -> Kernels {
         .arg_buf_named::<T, Buffer<T>>("b", None)
         .arg_buf_named::<T, Buffer<T>>("results", None)
         .arg_scl_named::<i32>("count", None);
-
 
 
     let add_assign_vec_vec = queue.create_kernel(&(type_prefix.clone() + "add_assign_vec_vec")).unwrap()
@@ -285,50 +307,22 @@ unsafe fn setup_kernels<T: Parameter>(queue: &ProQue) -> Kernels {
     }
 }
 
-unsafe fn setup_queue(types: &Vec<&str>) -> (KernelParams, ProQue) {
+unsafe fn setup_queue(types: &Vec<&str>) -> ProQue {
     let mut builder = ProQue::builder();
-    let is_gpu;
 
-
-    let (device, queue) = if let Some((p, d)) = get_gpu() {
-        is_gpu = true;
-
-        (d, builder
+    let queue = if let Some((p, d)) = get_gpu() {
+        builder
             .platform(p)
             .device(d)
-        )
     } else {
-        is_gpu = false;
         let (p, d) = get_cpu().unwrap();
-        (d, builder
+        builder
             .platform(p)
             .device(d)
-        )
-    };
-
-    use ocl::enums::DeviceInfoResult;
-    use ocl::enums::DeviceInfo;
-
-    let wgz = if let
-        DeviceInfoResult::MaxWorkGroupSize(s) =
-            device.info(DeviceInfo::MaxWorkGroupSize)
-        { s } else { 64 };
-
-    let kernel_params = if is_gpu {
-        KernelParams {
-            work_group_size: std::cmp::min(wgz, 64),
-            global_work_size: 2560,
-        }
-    } else {
-        KernelParams {
-            work_group_size: std::cmp::min(wgz, 16),
-            global_work_size: 32,
-        }
     };
 
 
-
-    let src = get_src(types, kernel_params.work_group_size);
+    let src = get_src(types);
     let q = match queue
         .src(src)
         .build()
@@ -337,11 +331,11 @@ unsafe fn setup_queue(types: &Vec<&str>) -> (KernelParams, ProQue) {
             Ok(q) => q,
         };
 
-    (kernel_params, q)
+    q
 }
 
-fn get_src(types: &Vec<&str>, work_group_size: usize) -> String {
-    let mut res = format!("#define lz {}\n", work_group_size);
+fn get_src(types: &Vec<&str>) -> String {
+    let mut res = String::new();
     for ty in types {
         let extra_src = load_extra_src().unwrap_or_default();
 
@@ -360,6 +354,10 @@ fn get_src(types: &Vec<&str>, work_group_size: usize) -> String {
 }
 
 fn get_gpu() -> Option<(ocl::Platform, ocl::Device)> {
+    if cfg!(feature = "no_gpu") {
+        return None;
+    }
+
     let platforms = ocl::Platform::list();
     for platform in platforms {
         let devices =

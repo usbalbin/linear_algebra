@@ -6,3 +6,6 @@ authors = ["usbalbin <albin9604@gmail.com>"]
 [dependencies]
 ocl = "0.16.0"
 lazy_static = "1.0.0"
+
+[features]
+no_gpu = []

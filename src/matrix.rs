@@ -255,7 +255,11 @@ fn mul_helper<T: Parameter>(a: &ocl::Buffer<T>, b: &ocl::Buffer<T>, a_row_count:
     kernel.set_arg_scl_named::<i32>("C_col_count", res.col_count as i32).unwrap();
     kernel.set_arg_scl_named::<i32>("A_col_count", a_col_count as i32).unwrap();
 
-    unsafe { kernel.cmd().gws(res.get_col_count() * res.get_row_count()).enq().unwrap(); }
+    unsafe {
+        let mut event = ocl::Event::empty();
+        kernel.cmd().enew(&mut event).gws(res.get_col_count() * res.get_row_count()).enq().unwrap();
+        event.wait_for().unwrap();
+    }
 
     res
 }

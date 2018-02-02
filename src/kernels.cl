@@ -76,21 +76,17 @@ kernel void {T}_eq_vec(global uchar* C, global {T}* A, global {T}* B) {
 
 #define lid get_local_id(0)
 #define wgid get_group_id(0)
+#define lz get_local_size(0)
 #define gz get_global_size(0)
 
 /// Calculate the sum of all the elements in the vector
-kernel void {T}_sum_vec(global const {T}* data, global {T}* results, int count) {
-#if __OPENCL_VERSION__ < 200
-		local {T} temp[lz];
-#endif
+kernel void {T}_sum_vec(global const {T}* data, global {T}* results, int count, local {T}* temp) {
 	{T} value = 0;
 	for (int globalIndex = i; globalIndex < count; globalIndex += gz) {
 		value += data[globalIndex];
 	}
 
-#if __OPENCL_VERSION__ >= 200
-	results[wgid] = work_group_reduce_sum(value);
-#else
+
 	temp[lid] = value;
 	barrier(CLK_LOCAL_MEM_FENCE);
 
@@ -103,23 +99,16 @@ kernel void {T}_sum_vec(global const {T}* data, global {T}* results, int count) 
 	if (lid == 0) {
 		results[wgid] = temp[0];
 	}
-
-#endif
 }
 
 /// Calculate the dot product of two vectors
-kernel void {T}_dot_vec_vec(global const {T}* a, global const {T}* b, global {T}* results, int count) {
-#if __OPENCL_VERSION__ < 200
-		local {T} temp[lz];
-#endif
-	{T} value = 0;
+kernel void {T}_dot_vec_vec(global const {T}* a, global const {T}* b, global {T}* results, int count, local {T}* temp) {
+    {T} value = 0;
 	for (int globalIndex = i; globalIndex < count; globalIndex += gz) {
 		value += a[globalIndex] * b[globalIndex];
 	}
 
-#if __OPENCL_VERSION__ >= 200
-	results[wgid] = work_group_reduce_sum(value);
-#else
+
 	temp[lid] = value;
 	barrier(CLK_LOCAL_MEM_FENCE);
 
@@ -132,8 +121,6 @@ kernel void {T}_dot_vec_vec(global const {T}* a, global const {T}* b, global {T}
 	if (lid == 0) {
 		results[wgid] = temp[0];
 	}
-
-#endif
 }
 
 #undef gz

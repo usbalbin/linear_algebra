@@ -39,7 +39,7 @@ impl<T: Parameter> Vector<T> {
             .flags(MemFlags::new().read_write())
             .dims(size)
             .build().unwrap();
-
+        
         Vector {
             data: buff
         }
@@ -81,7 +81,11 @@ impl<T: Parameter> Vector<T> {
         let mut res = unsafe { Vector::uninitialized(size) };
 
         kernel.set_arg_buf_named("C", Some(&mut res.data)).unwrap();
-        unsafe { kernel.cmd().gws(res.len()).enq().unwrap(); }
+        unsafe {
+            let mut event = ocl::Event::empty();
+            kernel.cmd().enew(&mut event).gws(res.len()).enq().unwrap();
+            event.wait_for().unwrap();
+        }
         res
     }
 
@@ -98,7 +102,11 @@ impl<T: Parameter> Vector<T> {
         kernel.set_arg_buf_named("A", Some(&a.data)).unwrap();
         kernel.set_arg_buf_named("B", Some(&b.data)).unwrap();
 
-        unsafe { kernel.cmd().gws(res.len()).enq().unwrap(); }
+        unsafe {
+            let mut event = ocl::Event::empty();
+            kernel.cmd().enew(&mut event).gws(res.len()).enq().unwrap();
+            event.wait_for().unwrap();
+        }
 
         res
     }
@@ -109,14 +117,22 @@ impl<T: Parameter> Vector<T> {
         kernel.set_arg_buf_named("C", Some(&mut self.data)).unwrap();
         kernel.set_arg_buf_named("B", Some(&other.data)).unwrap();
 
-        unsafe { kernel.cmd().gws(self.len()).enq().unwrap(); }
+        unsafe {
+            let mut event = ocl::Event::empty();
+            kernel.cmd().enew(&mut event).gws(self.len()).enq().unwrap();
+            event.wait_for().unwrap();
+        }
     }
 
     /// Applies p for every element in vector
     pub fn map_mut<F: FnMut(&mut T)>(&mut self, kernel: &mut Kernel) {
         kernel.set_arg_buf_named("C", Some(&mut self.data)).unwrap();
 
-        unsafe { kernel.cmd().gws(self.len()).enq().unwrap(); }
+        unsafe {
+            let mut event = ocl::Event::empty();
+            kernel.cmd().enew(&mut event).gws(self.len()).enq().unwrap();
+            event.wait_for().unwrap();
+        }
     }
 
     /// Returns copy of self with p applied to each element
@@ -126,7 +142,11 @@ impl<T: Parameter> Vector<T> {
         kernel.set_arg_buf_named("C", Some(&mut res.data)).unwrap();
         kernel.set_arg_buf_named("B", Some(&self.data)).unwrap();
 
-        unsafe { kernel.cmd().gws(res.len()).enq().unwrap(); }
+        unsafe {
+            let mut event = ocl::Event::empty();
+            kernel.cmd().enew(&mut event).gws(res.len()).enq().unwrap();
+            event.wait_for().unwrap();
+        }
         res
     }
 
@@ -238,32 +258,35 @@ impl<T: Parameter + ::std::iter::Sum<T>> Vector<T> {
     pub fn sum(&self) -> T {
         let mut data = cl_data::<T>();
 
-        let global_work_size = data.kernel_params.global_work_size;
-        let work_group_size = data.kernel_params.work_group_size;
-        let work_group_count = global_work_size / work_group_size;
-
-
-        if self.len() <= work_group_count { // No need to reduce?
-            return self.to_vec().into_iter().sum()
-        }
 
         let kernels = data.kernels.get_mut(T::type_to_str()).unwrap();
         let queue = kernels.queue.clone();
 
         let kernel = &mut kernels.sum_vec;
+        let kp = ::get_work_sizes(&kernel);
+
+        if self.len() <= kp.work_group_count { // No need to reduce?
+            return self.to_vec().into_iter().sum()
+        }
 
         unsafe {
-            let mut tmp = Vector::uninitialized_lock_free(work_group_count, queue);
+            let mut tmp = Vector::uninitialized_lock_free(kp.work_group_count, queue);
 
             kernel.set_arg_buf_named("data", Some(&self.data)).unwrap();
             kernel.set_arg_buf_named("results", Some(&mut tmp.data)).unwrap();
             kernel.set_arg_scl_named("count", self.len() as i32).unwrap();
+            kernel.set_arg_unchecked(3, ocl::enums::KernelArg::Local::<T>(&kp.work_group_size))
+                .unwrap();
 
+            let mut event = ocl::Event::empty();
             kernel.cmd()
-                .gws(global_work_size)
-                .lws(work_group_size)
+                .enew(&mut event)
+                .gws(kp.global_work_size)
+                .lws(kp.work_group_size)
                 .enq()
                 .unwrap();
+            event.wait_for().unwrap();
+
             tmp.to_vec().into_iter().sum()
         }
     }
@@ -305,34 +328,36 @@ pub fn dot<T: Parameter + Mul<T, Output=T> + ::std::iter::Sum<T>>(a: &Vector<T>,
 
     let mut data = cl_data::<T>();
 
-    let global_work_size = data.kernel_params.global_work_size;
-    let work_group_size = data.kernel_params.work_group_size;
-    let work_group_count = global_work_size / work_group_size;
-
-
-    if a.len() <= work_group_count { // No need to reduce?
-        return a.to_vec().iter().zip(b.to_vec().iter()).map(|(a, b)| *a * *b).sum()
-    }
-
-
     let kernels = data.kernels.get_mut(T::type_to_str()).unwrap();
     let queue = kernels.queue.clone();
 
     let kernel = &mut kernels.dot_vec_vec;
 
+    let kp = ::get_work_sizes(&kernel);
+
+    if a.len() <= kp.work_group_count { // No need to reduce?
+        return a.to_vec().iter().zip(b.to_vec().iter()).map(|(a, b)| *a * *b).sum()
+    }
+
+
     unsafe {
-        let mut tmp = Vector::uninitialized_lock_free(work_group_count, queue);
+        let mut tmp = Vector::uninitialized_lock_free(kp.work_group_count, queue);
 
         kernel.set_arg_buf_named("a", Some(&a.data)).unwrap();
         kernel.set_arg_buf_named("b", Some(&b.data)).unwrap();
         kernel.set_arg_buf_named("results", Some(&mut tmp.data)).unwrap();
         kernel.set_arg_scl_named("count", a.len() as i32).unwrap();
+        kernel.set_arg_unchecked(4, ocl::enums::KernelArg::Local::<T>(&kp.work_group_size))
+            .unwrap();
 
+        let mut event = ocl::Event::empty();
         kernel.cmd()
-            .gws(global_work_size)
-            .lws(work_group_size)
+            .enew(&mut event)
+            .gws(kp.global_work_size)
+            .lws(kp.work_group_size)
             .enq()
             .unwrap();
+        event.wait_for().unwrap();
         tmp.to_vec().into_iter().sum()
     }
 }
@@ -421,8 +446,11 @@ impl<'a, 'b, T> Mul<T> for &'a Vector<T>
         kernel.set_arg_buf_named("A", Some(&self.data)).unwrap();
         kernel.set_arg_scl_named("B", scalar).unwrap();
 
-        unsafe { kernel.cmd().gws(res.len()).enq().unwrap(); }
-
+        unsafe {
+            let mut event = ocl::Event::empty();
+            kernel.cmd().enew(&mut event).gws(res.len()).enq().unwrap();
+            event.wait_for().unwrap();
+        }
         res
     }
 }
@@ -499,7 +527,12 @@ impl<'a, 'b, T> Mul<&'b Matrix<T>> for &'a Vector<T>
         kernel.set_arg_scl_named::<i32>("B_col_count", other_m.get_col_count() as i32).unwrap();
         kernel.set_arg_scl_named::<i32>("A_len", self.len() as i32).unwrap();
 
-        unsafe { kernel.cmd().gws(res.len()).enq().unwrap(); }
+        unsafe {
+            let mut event = ocl::Event::empty();
+            kernel.cmd().enew(&mut event).gws(res.len()).enq().unwrap();
+            event.wait_for().unwrap();
+        }
+
 
         res
     }
@@ -527,7 +560,11 @@ pub fn mul_transpose_mat<T>(vector: &Vector<T>, other_m: &Matrix<T>) -> Vector<T
     kernel.set_arg_scl_named::<i32>("B_col_count", other_m.get_col_count() as i32).unwrap();
     kernel.set_arg_scl_named::<i32>("A_len", vector.len() as i32).unwrap();
 
-    unsafe { kernel.cmd().gws(res.len()).enq().unwrap(); }
+    unsafe {
+        let mut event = ocl::Event::empty();
+        kernel.cmd().enew(&mut event).gws(res.len()).enq().unwrap();
+        event.wait_for().unwrap();
+    }
     res
 }
 
@@ -577,7 +614,11 @@ impl<'a, T> Div<T> for &'a Vector<T>
         kernel.set_arg_buf_named("A", Some(&self.data)).unwrap();
         kernel.set_arg_scl_named("B", scalar).unwrap();
 
-        unsafe { kernel.cmd().gws(res.len()).enq().unwrap(); }
+        unsafe {
+            let mut event = ocl::Event::empty();
+            kernel.cmd().enew(&mut event).gws(res.len()).enq().unwrap();
+            event.wait_for().unwrap();
+        }
 
         res
     }
@@ -593,7 +634,11 @@ impl<T> DivAssign<T> for Vector<T>
         kernel.set_arg_buf_named("C", Some(&mut self.data)).unwrap();
         kernel.set_arg_scl_named("B", scalar).unwrap();
 
-        unsafe { kernel.cmd().gws(self.len()).enq().unwrap(); }
+        unsafe {
+            let mut event = ocl::Event::empty();
+            kernel.cmd().enew(&mut event).gws(self.len()).enq().unwrap();
+            event.wait_for().unwrap();
+        }
     }
 }
 
@@ -619,7 +664,11 @@ impl<'a, 'b, T> ::std::cmp::PartialEq for Vector<T>
         kernel.set_arg_buf_named("A", Some(&self.data)).unwrap();
         kernel.set_arg_buf_named("B", Some(&other.data)).unwrap();
 
-        unsafe { kernel.cmd().gws(self.len()).enq().unwrap(); }
+        unsafe {
+            let mut event = ocl::Event::empty();
+            kernel.cmd().enew(&mut event).gws(self.len()).enq().unwrap();
+            event.wait_for().unwrap();
+        }
 
         is_equal.to_vec()[0] != 0
     }
@@ -657,3 +706,10 @@ impl<T: Parameter> Clone for Vector<T> {
         }
     }
 }
+
+/*
+impl<T: Parameter> Drop for Vector<T> {
+    fn drop(&mut self) {
+        println!("Vector dropped");
+    }
+}*/

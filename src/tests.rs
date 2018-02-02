@@ -283,7 +283,6 @@ fn vec_clone() {
     assert_ne!(a, b);
 }
 
-
 use ::traits::Real;
 use ::std::ops::{ Sub, Neg };
 use ::std::cmp::PartialOrd;
