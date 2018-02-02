@@ -98,7 +98,7 @@ pub fn get_cl_data<T: Parameter>() -> ocl::Queue {
 }
 
 /// Get optimal work sizes for kernel
-fn get_work_sizes(kernel: &ocl::Kernel) -> KernelParams {
+pub fn get_work_sizes(kernel: &ocl::Kernel) -> KernelParams {
     use ocl::enums::{ KernelWorkGroupInfoResult, KernelWorkGroupInfo };
 
     let result = kernel.wg_info(
