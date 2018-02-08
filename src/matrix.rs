@@ -6,6 +6,7 @@ use traits::Parameter;
 use util::*;
 use vector::*;
 
+#[derive(Clone)]
 pub struct Matrix<T: Parameter> {
     pub(crate) data: Vector<T>,
     row_count: usize,

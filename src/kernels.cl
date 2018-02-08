@@ -123,6 +123,23 @@ kernel void {T}_dot_vec_vec(global const {T}* a, global const {T}* b, global {T}
 	}
 }
 
+{T} {T}_swap(global {T}* a, global {T}* b) {
+    {T} tmp = *a;
+    *a = *b;
+    *b = tmp;
+}
+
+kernel void {T}_bitonic_sort_vec(global {T}* data, int j, int k){
+    int ixj = i ^ j; // Calculate indexing!
+    if (ixj > i && ixj < gz)
+    {
+      if ((i & k) == 0 && data[i] > data[ixj])
+          {T}_swap(&data[i], &data[ixj]);
+      if ((i & k) != 0 && data[i] < data[ixj])
+          {T}_swap(&data[i], &data[ixj]);
+    }
+}
+
 #undef gz
 #undef wgid
 #undef lid

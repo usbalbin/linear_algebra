@@ -283,6 +283,31 @@ fn vec_clone() {
     assert_ne!(a, b);
 }
 
+#[test]
+fn mat_clone() {
+
+    use matrix::*;
+
+    let a: Matrix<TestType> = Matrix::from_vec((0..200).collect(), 10, 20);
+    let b: Matrix<TestType> = a.clone();
+
+    assert_eq!(a, b);
+}
+
+/*#[test]
+fn sort_vec() {//TODO: Make this work for sizes other then those of a power of 2
+    use vector::*;
+
+    for size in &[4, 16, 64, 128, (1 << 28)] {
+        let mut v: Vec<i32> = (0..*size).rev().map(|x| x).collect();
+        let mut a = Vector::from_vec(v.clone());
+        a.sort();
+        v.sort();
+        println!("asdsadfd {}", size);
+        assert_eq!(a.to_vec(), v);
+    }
+}*/
+
 use ::traits::Real;
 use ::std::ops::{ Sub, Neg };
 use ::std::cmp::PartialOrd;

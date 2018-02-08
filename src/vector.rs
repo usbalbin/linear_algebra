@@ -323,6 +323,46 @@ impl<T> Vector<T>
     }
 }
 
+impl<T> Vector<T>
+    where T: Parameter + PartialOrd
+{
+    fn sort(&mut self) { //TODO: Make this work for sizes other then those of a power of 2
+
+        let kernel = &mut get_kernels::<T>(T::type_to_str()).bitonic_sort_vec;
+        kernel.set_arg_buf_named("data", Some(&mut self.data)).unwrap();
+
+        let mut k = 2;
+        while k <= round_up_pow_2(self.len() as i32) // Outer loop, double size for each step
+        {
+            let mut j = k >> 1;
+            while j > 0 // Inner loop, half size for each step
+            {
+                kernel.set_arg_scl_named::<i32>("j", j).unwrap();
+                kernel.set_arg_scl_named::<i32>("k", k).unwrap();
+
+                unsafe {
+                let mut event = ocl::Event::empty();
+                kernel.cmd().enew(& mut event).gws(self.len()).enq().unwrap();
+                event.wait_for().unwrap();
+                }
+                j >>= 1;
+            }
+            k <<= 1;
+        }
+    }
+}
+
+// https://graphics.stanford.edu/~seander/bithacks.html#RoundUpPowerOf2
+pub fn round_up_pow_2(x: i32) -> i32 {
+    let mut x = x - 1;
+    x |= x >> 1;
+    x |= x >> 2;
+    x |= x >> 4;
+    x |= x >> 8;
+    x |= x >> 16;
+    x + 1
+}
+
 pub fn dot<T: Parameter + Mul<T, Output=T> + ::std::iter::Sum<T>>(a: &Vector<T>, b: &Vector<T>) -> T {
     assert_eq!(a.len(), b.len());
 

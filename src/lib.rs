@@ -53,6 +53,7 @@ pub struct Kernels {
 
     eq_vec: ocl::Kernel,
     sum_vec: ocl::Kernel,
+    bitonic_sort_vec: ocl::Kernel,
 
     //Matrix vec
 
@@ -124,18 +125,18 @@ pub fn get_work_sizes(kernel: &ocl::Kernel) -> KernelParams {
 /// Get all OpenCL data, internal use only
 fn cl_data<'a, T: Parameter>() -> MutexGuard<'a, OclData> {
     lazy_static! {
-    static ref CL_DATA: Mutex<OclData> =
-    {
-        let types = &*TYPES.lock().unwrap();
+        static ref CL_DATA: Mutex<OclData> =
+        {
+            let types = &*TYPES.lock().unwrap();
 
-        let queue = unsafe { setup_queue(types) };
+            let queue = unsafe { setup_queue(types) };
 
-        Mutex::new( OclData {
-            queue,
-            kernels: HashMap::new(),
-        })
-    };
-}
+            Mutex::new( OclData {
+                queue,
+                kernels: HashMap::new(),
+            })
+        };
+    }
 
     let mut data = CL_DATA.lock().unwrap();
     let ty = T::type_to_str().to_owned();
@@ -248,6 +249,11 @@ unsafe fn setup_kernels<T: Parameter>(queue: &ProQue) -> Kernels {
         .arg_buf_named::<T, Buffer<T>>("results", None)
         .arg_scl_named::<i32>("count", None);
 
+    let bitonic_sort_vec = queue.create_kernel(&(type_prefix.clone() + "bitonic_sort_vec")).unwrap()
+        .arg_buf_named::<T, Buffer<T>>("data", None)
+        .arg_scl_named::<i32>("j", None)
+        .arg_scl_named::<i32>("k", None);
+
 
     //Matrix vec
 
@@ -293,6 +299,7 @@ unsafe fn setup_kernels<T: Parameter>(queue: &ProQue) -> Kernels {
 
         eq_vec,
         sum_vec,
+        bitonic_sort_vec,
 
         //Matrix vec
 
