@@ -138,6 +138,24 @@ impl<T: Parameter> Matrix<T> {
             col_count: self.col_count
         }
     }
+
+    /// Add scalar to every element of matrix
+    pub fn add_scalar(&self, scalar: T) -> Matrix<T> {
+        Matrix {
+            data: self.data.add_scalar(scalar),
+            row_count: self.row_count,
+            col_count: self.col_count
+        }
+    }
+
+    /// Subtract scalar from every element of matrix
+    pub fn sub_scalar(&self, scalar: T) -> Matrix<T> {
+        Matrix {
+            data: self.data.sub_scalar(scalar),
+            row_count: self.row_count,
+            col_count: self.col_count
+        }
+    }
 }
 
 impl<T> Matrix<T>

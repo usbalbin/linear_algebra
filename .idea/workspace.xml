@@ -2,8 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="e9df9a60-8bf9-4b69-9308-34b2d0f65804" name="Default" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change beforePath="$PROJECT_DIR$/Cargo.lock" afterPath="$PROJECT_DIR$/Cargo.lock" />
+      <change beforePath="$PROJECT_DIR$/Cargo.toml" afterPath="$PROJECT_DIR$/Cargo.toml" />
       <change beforePath="$PROJECT_DIR$/src/matrix.rs" afterPath="$PROJECT_DIR$/src/matrix.rs" />
-      <change beforePath="$PROJECT_DIR$/src/vector.rs" afterPath="$PROJECT_DIR$/src/vector.rs" />
     </list>
     <ignored path="$PROJECT_DIR$/target/" />
     <ignored path="$PROJECT_DIR$/out/" />
@@ -78,11 +80,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="vector.rs" pinned="false" current-in-tab="true">
+      <file leaf-file-name="vector.rs" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/vector.rs">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="629">
-              <caret line="398" column="20" lean-forward="false" selection-start-line="398" selection-start-column="20" selection-end-line="398" selection-end-column="20" />
+            <state relative-caret-position="221">
+              <caret line="254" column="4" lean-forward="false" selection-start-line="254" selection-start-column="4" selection-end-line="300" selection-end-column="5" />
               <folding>
                 <element signature="e#600#833#0" expanded="false" />
                 <element signature="e#793#827#0" expanded="false" />
@@ -164,14 +166,14 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="matrix.rs" pinned="false" current-in-tab="false">
+      <file leaf-file-name="matrix.rs" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/matrix.rs">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="366">
-              <caret line="148" column="28" lean-forward="false" selection-start-line="148" selection-start-column="28" selection-end-line="148" selection-end-column="28" />
+            <state relative-caret-position="443">
+              <caret line="153" column="47" lean-forward="false" selection-start-line="153" selection-start-column="47" selection-end-line="153" selection-end-column="47" />
               <folding>
-                <element signature="e#7031#7032#0" expanded="true" />
-                <element signature="e#7066#7067#0" expanded="true" />
+                <element signature="e#7558#7559#0" expanded="true" />
+                <element signature="e#7593#7594#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -260,9 +262,9 @@
         <option value="$PROJECT_DIR$/src/kernels.cl" />
         <option value="$PROJECT_DIR$/src/lib.rs" />
         <option value="$PROJECT_DIR$/src/tests.rs" />
+        <option value="$PROJECT_DIR$/src/vector.rs" />
         <option value="$PROJECT_DIR$/Cargo.toml" />
         <option value="$PROJECT_DIR$/src/matrix.rs" />
-        <option value="$PROJECT_DIR$/src/vector.rs" />
       </list>
     </option>
   </component>
@@ -602,8 +604,8 @@
         <state relative-caret-position="255">
           <caret line="15" column="13" lean-forward="true" selection-start-line="15" selection-start-column="13" selection-end-line="15" selection-end-column="13" />
           <folding>
-            <element signature="e#7031#7032#0" expanded="true" />
-            <element signature="e#7066#7067#0" expanded="true" />
+            <element signature="e#7558#7559#0" expanded="true" />
+            <element signature="e#7593#7594#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -698,8 +700,8 @@
         <state relative-caret-position="731">
           <caret line="48" column="16" lean-forward="false" selection-start-line="48" selection-start-column="16" selection-end-line="48" selection-end-column="16" />
           <folding>
-            <element signature="e#7031#7032#0" expanded="true" />
-            <element signature="e#7066#7067#0" expanded="true" />
+            <element signature="e#7558#7559#0" expanded="true" />
+            <element signature="e#7593#7594#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -801,8 +803,8 @@
         <state relative-caret-position="527">
           <caret line="31" column="97" lean-forward="false" selection-start-line="31" selection-start-column="97" selection-end-line="31" selection-end-column="97" />
           <folding>
-            <element signature="e#7031#7032#0" expanded="true" />
-            <element signature="e#7066#7067#0" expanded="true" />
+            <element signature="e#7558#7559#0" expanded="true" />
+            <element signature="e#7593#7594#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -904,8 +906,8 @@
         <state relative-caret-position="1938">
           <caret line="114" column="28" lean-forward="false" selection-start-line="114" selection-start-column="28" selection-end-line="114" selection-end-column="28" />
           <folding>
-            <element signature="e#7031#7032#0" expanded="true" />
-            <element signature="e#7066#7067#0" expanded="true" />
+            <element signature="e#7558#7559#0" expanded="true" />
+            <element signature="e#7593#7594#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -1007,8 +1009,8 @@
         <state relative-caret-position="1938">
           <caret line="114" column="28" lean-forward="false" selection-start-line="114" selection-start-column="28" selection-end-line="114" selection-end-column="28" />
           <folding>
-            <element signature="e#7031#7032#0" expanded="true" />
-            <element signature="e#7066#7067#0" expanded="true" />
+            <element signature="e#7558#7559#0" expanded="true" />
+            <element signature="e#7593#7594#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -1119,8 +1121,8 @@
         <state relative-caret-position="1938">
           <caret line="114" column="28" lean-forward="false" selection-start-line="114" selection-start-column="28" selection-end-line="114" selection-end-column="28" />
           <folding>
-            <element signature="e#7031#7032#0" expanded="true" />
-            <element signature="e#7066#7067#0" expanded="true" />
+            <element signature="e#7558#7559#0" expanded="true" />
+            <element signature="e#7593#7594#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -1271,14 +1273,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Cargo.toml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="34">
-          <caret line="2" column="17" lean-forward="false" selection-start-line="2" selection-start-column="17" selection-end-line="2" selection-end-column="17" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/lib.rs">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="337">
@@ -1302,21 +1296,18 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/matrix.rs">
+    <entry file="file://$PROJECT_DIR$/Cargo.toml">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="366">
-          <caret line="148" column="28" lean-forward="false" selection-start-line="148" selection-start-column="28" selection-end-line="148" selection-end-column="28" />
-          <folding>
-            <element signature="e#7031#7032#0" expanded="true" />
-            <element signature="e#7066#7067#0" expanded="true" />
-          </folding>
+        <state relative-caret-position="34">
+          <caret line="2" column="17" lean-forward="false" selection-start-line="2" selection-start-column="17" selection-end-line="2" selection-end-column="17" />
+          <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/vector.rs">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="629">
-          <caret line="398" column="20" lean-forward="false" selection-start-line="398" selection-start-column="20" selection-end-line="398" selection-end-column="20" />
+        <state relative-caret-position="221">
+          <caret line="254" column="4" lean-forward="false" selection-start-line="254" selection-start-column="4" selection-end-line="300" selection-end-column="5" />
           <folding>
             <element signature="e#600#833#0" expanded="false" />
             <element signature="e#793#827#0" expanded="false" />
@@ -1371,6 +1362,17 @@
             <element signature="e#25278#25535#0" expanded="false" />
             <element signature="e#25576#25796#0" expanded="false" />
             <element signature="e#25798#25911#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/matrix.rs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="443">
+          <caret line="153" column="47" lean-forward="false" selection-start-line="153" selection-start-column="47" selection-end-line="153" selection-end-column="47" />
+          <folding>
+            <element signature="e#7558#7559#0" expanded="true" />
+            <element signature="e#7593#7594#0" expanded="true" />
           </folding>
         </state>
       </provider>
