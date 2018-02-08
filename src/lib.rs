@@ -56,6 +56,7 @@ pub struct Kernels {
     eq_vec: ocl::Kernel,
     sum_vec: ocl::Kernel,
     squared_vec: ocl::Kernel,
+    sqrted_vec: ocl::Kernel,
     bitonic_sort_vec: ocl::Kernel,
 
     //Matrix vec
@@ -255,6 +256,14 @@ unsafe fn setup_kernels<T: Parameter>(queue: &ProQue) -> Kernels {
         .arg_buf_named::<T, Buffer<T>>("C", None)
         .arg_buf_named::<T, Buffer<T>>("A", None);
 
+    let sqrted_vec = if T::type_to_str() == "float" || T::type_to_str() == "double" {
+        queue.create_kernel(&(type_prefix.clone() + "sqrted_vec")).unwrap()
+            .arg_buf_named::<T, Buffer<T>>("C", None)
+            .arg_buf_named::<T, Buffer<T>>("A", None)
+    } else { //TODO: find better solution to this
+        queue.create_kernel(&(type_prefix.clone() + "dummy_kernel")).unwrap()
+    };
+
     let eq_vec = queue.create_kernel(&(type_prefix.clone() + "eq_vec")).unwrap()
         .arg_buf_named::<u8, Buffer<u8>>("C", None)
         .arg_buf_named::<T, Buffer<T>>("A", None)
@@ -317,6 +326,7 @@ unsafe fn setup_kernels<T: Parameter>(queue: &ProQue) -> Kernels {
 
         eq_vec,
         squared_vec,
+        sqrted_vec,
         sum_vec,
         bitonic_sort_vec,
 

@@ -85,6 +85,12 @@ kernel void {T}_squared_vec(global {T}* C, global {T}* A) {
 	C[i] = A[i] * A[i];
 }
 
+#if defined(IS_FLOAT) || defined(IS_DOUBLE)
+kernel void {T}_sqrted_vec(global {T}* C, global {T}* A) {
+	C[i] = sqrt(A[i]);
+}
+#endif // IS_FLOAT or IS_DOUBLE
+
 #define lid get_local_id(0)
 #define wgid get_group_id(0)
 #define lz get_local_size(0)
@@ -220,3 +226,8 @@ kernel void {T}_mul_mat_mat_col(global {T}* C, global {T}* A, global {T}* B, int
 	}
 }
 #undef col
+
+// TODO: try to get rid of this
+kernel void {T}_dummy_kernel(global {T}* C, global {T}* A){
+
+}

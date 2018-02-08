@@ -392,6 +392,29 @@ impl<T> Vector<T>
         let inv_length = T::one() / self.length();
         self * inv_length
     }
+
+    /// Calculate the element wise square root of the vector
+    pub fn sqrted(&self) -> Vector<T> {
+        let mut kernels = get_kernels::<T>(T::type_to_str());
+
+        let queue = kernels.queue.clone();
+        let kernel = &mut kernels.sqrted_vec;
+
+        let mut res = unsafe{ Vector::uninitialized_lock_free(
+            self.len(),
+            queue
+        )};
+
+        kernel.set_arg_buf_named("C", Some(&mut res.data)).unwrap();
+        kernel.set_arg_buf_named("A", Some(&self.data)).unwrap();
+
+        unsafe {
+            let mut event = ocl::Event::empty();
+            kernel.cmd().enew(&mut event).gws(res.len()).enq().unwrap();
+            event.wait_for().unwrap();
+        }
+        res
+    }
 }
 
 impl<T> Vector<T>

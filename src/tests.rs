@@ -323,6 +323,15 @@ fn vec_squared() {
     assert_eq!(a.squared(), b);
 }
 
+#[test]
+fn vec_sqrted() {
+    use vector::*;
+
+    let a: Vector<f32> = Vector::from_vec((0..100).map(|x|(x * x) as f32).collect());
+    let b: Vector<f32> = Vector::from_vec((0..100).map(|x| x as f32).collect());
+
+    assert_eq!(a.sqrted(), b);
+}
 
 
 /*#[test]
