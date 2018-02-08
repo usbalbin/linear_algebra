@@ -5,6 +5,7 @@ use get_kernels;
 use traits::Parameter;
 use util::*;
 use vector::*;
+use traits::Real;
 
 #[derive(Clone)]
 pub struct Matrix<T: Parameter> {
@@ -128,6 +129,27 @@ impl<T: Parameter> Matrix<T> {
         let mut file = File::open(path).expect("Failed to open file");
 
         Ok(Self::read_from_file(&mut file).expect("Failed to read all data from file"))
+    }
+
+    pub fn squared(&self) -> Matrix<T> {
+        Matrix {
+            data: self.data.squared(),
+            row_count: self.row_count,
+            col_count: self.col_count
+        }
+    }
+}
+
+impl<T> Matrix<T>
+    where T:
+    Parameter + Real
+{
+    pub fn sqrted(&self) -> Matrix<T> {
+        Matrix {
+            data: self.data.sqrted(),
+            row_count: self.row_count,
+            col_count: self.col_count
+        }
     }
 }
 
