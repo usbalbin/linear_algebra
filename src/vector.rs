@@ -251,7 +251,9 @@ impl<T: Parameter> Vector<T> {
     pub unsafe fn get_buf_mut(&mut self) -> &mut ocl::Buffer<T> {
         &mut self.data
     }
+}
 
+impl<T: Parameter + ::std::ops::Add<T, Output=T>> Vector<T> {
     /// Add scalar to every element of vector
     pub fn add_scalar(&self, scalar: T) -> Vector<T> {
         let mut kernels = get_kernels::<T>(T::type_to_str());
@@ -259,10 +261,12 @@ impl<T: Parameter> Vector<T> {
         let queue = kernels.queue.clone();
         let kernel = &mut kernels.add_vec_scl;
 
-        let mut res = unsafe{ Vector::uninitialized_lock_free(
-            self.len(),
-            queue
-        )};
+        let mut res = unsafe {
+            Vector::uninitialized_lock_free(
+                self.len(),
+                queue
+            )
+        };
 
         kernel.set_arg_buf_named("C", Some(&mut res.data)).unwrap();
         kernel.set_arg_buf_named("A", Some(&self.data)).unwrap();
@@ -275,7 +279,10 @@ impl<T: Parameter> Vector<T> {
         }
         res
     }
+}
 
+
+impl<T: Parameter + ::std::ops::Sub<T, Output=T>> Vector<T> {
     /// Subtract scalar from every element of vector
     pub fn sub_scalar(&self, scalar: T) -> Vector<T> {
         let mut kernels = get_kernels::<T>(T::type_to_str());
@@ -283,10 +290,12 @@ impl<T: Parameter> Vector<T> {
         let queue = kernels.queue.clone();
         let kernel = &mut kernels.sub_vec_scl;
 
-        let mut res = unsafe{ Vector::uninitialized_lock_free(
-            self.len(),
-            queue
-        )};
+        let mut res = unsafe {
+            Vector::uninitialized_lock_free(
+                self.len(),
+                queue
+            )
+        };
 
         kernel.set_arg_buf_named("C", Some(&mut res.data)).unwrap();
         kernel.set_arg_buf_named("A", Some(&self.data)).unwrap();
@@ -299,7 +308,10 @@ impl<T: Parameter> Vector<T> {
         }
         res
     }
+}
 
+
+impl<T: Parameter + ::std::ops::Mul<T, Output=T>> Vector<T> {
     /// Calculate the element wise x**2 of the vector
     pub fn squared(&self) -> Vector<T> {
         let mut kernels = get_kernels::<T>(T::type_to_str());
@@ -307,10 +319,12 @@ impl<T: Parameter> Vector<T> {
         let queue = kernels.queue.clone();
         let kernel = &mut kernels.squared_vec;
 
-        let mut res = unsafe{ Vector::uninitialized_lock_free(
-            self.len(),
-            queue
-        )};
+        let mut res = unsafe {
+            Vector::uninitialized_lock_free(
+                self.len(),
+                queue
+            )
+        };
 
         kernel.set_arg_buf_named("C", Some(&mut res.data)).unwrap();
         kernel.set_arg_buf_named("A", Some(&self.data)).unwrap();

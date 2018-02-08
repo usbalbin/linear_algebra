@@ -130,15 +130,9 @@ impl<T: Parameter> Matrix<T> {
 
         Ok(Self::read_from_file(&mut file).expect("Failed to read all data from file"))
     }
+}
 
-    pub fn squared(&self) -> Matrix<T> {
-        Matrix {
-            data: self.data.squared(),
-            row_count: self.row_count,
-            col_count: self.col_count
-        }
-    }
-
+impl<T: Parameter + ::std::ops::Add<T, Output=T>> Matrix<T> {
     /// Add scalar to every element of matrix
     pub fn add_scalar(&self, scalar: T) -> Matrix<T> {
         Matrix {
@@ -147,11 +141,43 @@ impl<T: Parameter> Matrix<T> {
             col_count: self.col_count
         }
     }
+}
 
+impl<T: Parameter + ::std::ops::Sub<T, Output=T>> Matrix<T> {
     /// Subtract scalar from every element of matrix
     pub fn sub_scalar(&self, scalar: T) -> Matrix<T> {
         Matrix {
             data: self.data.sub_scalar(scalar),
+            row_count: self.row_count,
+            col_count: self.col_count
+        }
+    }
+}
+
+impl<T: Parameter + ::std::ops::Mul<T, Output=T>> Matrix<T> {
+    /// Element multiply
+    pub fn elem_wise_mul(&self, other: &Matrix<T>) -> Matrix<T> {
+        Matrix {
+            data: &self.data * &other.data,
+            row_count: self.row_count,
+            col_count: self.col_count
+        }
+    }
+    /// Calculate x**2 for every element
+    pub fn squared(&self) -> Matrix<T> {
+        Matrix {
+            data: self.data.squared(),
+            row_count: self.row_count,
+            col_count: self.col_count
+        }
+    }
+}
+
+impl<T: Parameter + ::std::ops::Div<T, Output=T>> Matrix<T> {
+    /// Element division
+    pub fn elem_wise_div(&self, other: &Matrix<T>) -> Matrix<T> {
+        Matrix {
+            data: &self.data / &other.data,
             row_count: self.row_count,
             col_count: self.col_count
         }
