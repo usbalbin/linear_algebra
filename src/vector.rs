@@ -251,6 +251,77 @@ impl<T: Parameter> Vector<T> {
     pub unsafe fn get_buf_mut(&mut self) -> &mut ocl::Buffer<T> {
         &mut self.data
     }
+
+    /// Add scalar to every element of vector
+    pub fn add_scalar(&self, scalar: T) -> Vector<T> {
+        let mut kernels = get_kernels::<T>(T::type_to_str());
+
+        let queue = kernels.queue.clone();
+        let kernel = &mut kernels.add_vec_scl;
+
+        let mut res = unsafe{ Vector::uninitialized_lock_free(
+            self.len(),
+            queue
+        )};
+
+        kernel.set_arg_buf_named("C", Some(&mut res.data)).unwrap();
+        kernel.set_arg_buf_named("A", Some(&self.data)).unwrap();
+        kernel.set_arg_scl_named("B", scalar).unwrap();
+
+        unsafe {
+            let mut event = ocl::Event::empty();
+            kernel.cmd().enew(&mut event).gws(res.len()).enq().unwrap();
+            event.wait_for().unwrap();
+        }
+        res
+    }
+
+    /// Subtract scalar from every element of vector
+    pub fn sub_scalar(&self, scalar: T) -> Vector<T> {
+        let mut kernels = get_kernels::<T>(T::type_to_str());
+
+        let queue = kernels.queue.clone();
+        let kernel = &mut kernels.sub_vec_scl;
+
+        let mut res = unsafe{ Vector::uninitialized_lock_free(
+            self.len(),
+            queue
+        )};
+
+        kernel.set_arg_buf_named("C", Some(&mut res.data)).unwrap();
+        kernel.set_arg_buf_named("A", Some(&self.data)).unwrap();
+        kernel.set_arg_scl_named("B", scalar).unwrap();
+
+        unsafe {
+            let mut event = ocl::Event::empty();
+            kernel.cmd().enew(&mut event).gws(res.len()).enq().unwrap();
+            event.wait_for().unwrap();
+        }
+        res
+    }
+
+    /// Calculate the element wise x**2 of the vector
+    pub fn squared(&self) -> Vector<T> {
+        let mut kernels = get_kernels::<T>(T::type_to_str());
+
+        let queue = kernels.queue.clone();
+        let kernel = &mut kernels.squared_vec;
+
+        let mut res = unsafe{ Vector::uninitialized_lock_free(
+            self.len(),
+            queue
+        )};
+
+        kernel.set_arg_buf_named("C", Some(&mut res.data)).unwrap();
+        kernel.set_arg_buf_named("A", Some(&self.data)).unwrap();
+
+        unsafe {
+            let mut event = ocl::Event::empty();
+            kernel.cmd().enew(&mut event).gws(res.len()).enq().unwrap();
+            event.wait_for().unwrap();
+        }
+        res
+    }
 }
 
 impl<T: Parameter + ::std::iter::Sum<T>> Vector<T> {

@@ -285,7 +285,6 @@ fn vec_clone() {
 
 #[test]
 fn mat_clone() {
-
     use matrix::*;
 
     let a: Matrix<TestType> = Matrix::from_vec((0..200).collect(), 10, 20);
@@ -293,6 +292,38 @@ fn mat_clone() {
 
     assert_eq!(a, b);
 }
+
+#[test]
+fn vec_add_scl() {
+    use vector::*;
+
+    let a: Vector<TestType> = Vector::from_vec((0..100).collect());
+    let b: Vector<TestType> = Vector::from_vec((0..100).map(|x| x + 10).collect());
+
+    assert_eq!(a.add_scalar(10), b);
+}
+
+#[test]
+fn vec_sub_scl() {
+    use vector::*;
+
+    let a: Vector<TestType> = Vector::from_vec((10..110).collect());
+    let b: Vector<TestType> = Vector::from_vec((10..110).map(|x| x - 10).collect());
+
+    assert_eq!(a.sub_scalar(10), b);
+}
+
+#[test]
+fn vec_squared() {
+    use vector::*;
+
+    let a: Vector<TestType> = Vector::from_vec((0..100).collect());
+    let b: Vector<TestType> = Vector::from_vec((0..100).map(|x| x * x).collect());
+
+    assert_eq!(a.squared(), b);
+}
+
+
 
 /*#[test]
 fn sort_vec() {//TODO: Make this work for sizes other then those of a power of 2

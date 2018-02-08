@@ -45,6 +45,8 @@ pub struct Kernels {
     mul_assign_vec_vec: ocl::Kernel,
     div_assign_vec_vec: ocl::Kernel,
 
+    add_vec_scl: ocl::Kernel,
+    sub_vec_scl: ocl::Kernel,
     mul_vec_scl: ocl::Kernel,
     div_vec_scl: ocl::Kernel,
 
@@ -53,6 +55,7 @@ pub struct Kernels {
 
     eq_vec: ocl::Kernel,
     sum_vec: ocl::Kernel,
+    squared_vec: ocl::Kernel,
     bitonic_sort_vec: ocl::Kernel,
 
     //Matrix vec
@@ -223,6 +226,15 @@ unsafe fn setup_kernels<T: Parameter>(queue: &ProQue) -> Kernels {
         .arg_buf_named::<T, Buffer<T>>("C", None)
         .arg_buf_named::<T, Buffer<T>>("B", None);
 
+
+    let add_vec_scl = queue.create_kernel(&(type_prefix.clone() + "add_vec_scl")).unwrap()
+        .arg_buf_named::<T, Buffer<T>>("C", None)
+        .arg_buf_named::<T, Buffer<T>>("A", None)
+        .arg_scl_named::<T>("B", None);
+    let sub_vec_scl = queue.create_kernel(&(type_prefix.clone() + "sub_vec_scl")).unwrap()
+        .arg_buf_named::<T, Buffer<T>>("C", None)
+        .arg_buf_named::<T, Buffer<T>>("A", None)
+        .arg_scl_named::<T>("B", None);
     let mul_vec_scl = queue.create_kernel(&(type_prefix.clone() + "mul_vec_scl")).unwrap()
         .arg_buf_named::<T, Buffer<T>>("C", None)
         .arg_buf_named::<T, Buffer<T>>("A", None)
@@ -238,6 +250,10 @@ unsafe fn setup_kernels<T: Parameter>(queue: &ProQue) -> Kernels {
     let div_assign_vec_scl = queue.create_kernel(&(type_prefix.clone() + "div_assign_vec_scl")).unwrap()
         .arg_buf_named::<T, Buffer<T>>("C", None)
         .arg_scl_named::<T>("B", None);
+
+    let squared_vec = queue.create_kernel(&(type_prefix.clone() + "squared_vec")).unwrap()
+        .arg_buf_named::<T, Buffer<T>>("C", None)
+        .arg_buf_named::<T, Buffer<T>>("A", None);
 
     let eq_vec = queue.create_kernel(&(type_prefix.clone() + "eq_vec")).unwrap()
         .arg_buf_named::<u8, Buffer<u8>>("C", None)
@@ -291,6 +307,8 @@ unsafe fn setup_kernels<T: Parameter>(queue: &ProQue) -> Kernels {
         mul_assign_vec_vec,
         div_assign_vec_vec,
 
+        add_vec_scl,
+        sub_vec_scl,
         mul_vec_scl,
         div_vec_scl,
 
@@ -298,6 +316,7 @@ unsafe fn setup_kernels<T: Parameter>(queue: &ProQue) -> Kernels {
         div_assign_vec_scl,
 
         eq_vec,
+        squared_vec,
         sum_vec,
         bitonic_sort_vec,
 

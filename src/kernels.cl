@@ -48,6 +48,14 @@ kernel void {T}_div_assign_vec_vec(global {T}* C, global {T}* B) {
 
 //
 
+kernel void {T}_add_vec_scl(global {T}* C, global {T}* A, {T} B) {
+	C[i] = A[i] + B;
+}
+
+kernel void {T}_sub_vec_scl(global {T}* C, global {T}* A, {T} B) {
+	C[i] = A[i] - B;
+}
+
 kernel void {T}_mul_vec_scl(global {T}* C, global {T}* A, {T} B) {
 	C[i] = A[i] * B;
 }
@@ -73,6 +81,9 @@ kernel void {T}_eq_vec(global uchar* C, global {T}* A, global {T}* B) {
 		*C = false;
 }
 
+kernel void {T}_squared_vec(global {T}* C, global {T}* A) {
+	C[i] = A[i] * A[i];
+}
 
 #define lid get_local_id(0)
 #define wgid get_group_id(0)
